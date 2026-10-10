@@ -1,35 +1,15 @@
 <div align="center">
 
-# TAPAS
+# ThermaLens
 ### Thermal Assessment & Protection Analytics System
 
-**A ward-level extreme-heatwave early warning system with a Human Thermal Stress Index, for Indian cities**
+**A ward-level early-warning and decision-support system for extreme heat in Indian cities, using a Human Thermal Stress Index**
 
-[![SIH 2026](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-orange)](https://sih.gov.in)
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://tapas-1-8mey.onrender.com)
+
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688)
 
 </div>
-
-<p align="center"><b>Problem Statement ID: 26083</b> &nbsp;|&nbsp; <b>Team Name: Ecolytes</b></p>
-
----
-
-## Smart India Hackathon 2026
-
-| Field | Details |
-|---|---|
-| **Problem Statement ID** | **26083** (SIH26083) |
-| **Problem Statement Title** | Extreme Heatwave Early Warning and Human Thermal Stress Index |
-| **Organization** | Ministry of Earth Sciences |
-| **Theme** | Disaster Management |
-| **Category** | Software |
-| **Team Name** | **Ecolytes** |
-
-- 🌐 **Live Demo:** <https://tapas-1-8mey.onrender.com>
-- 🎥 **Demo Video:** <https://youtu.be/VvamWQAeTxo>
-
 ---
 
 ## Table of Contents
@@ -52,45 +32,45 @@
 
 ## 1. Problem Statement
 
-Heatwaves are among India's deadliest and fastest-growing climate hazards. Current warnings are typically issued at **district or city level** and are driven by **temperature alone**, which creates three gaps:
+Heatwaves are a major and growing climate-related threat in India. Many warning systems operate at the **district or city scale** and rely heavily on **air temperature**, leaving several important gaps:
 
-- **Not local enough.** Within one city, a dense, low-vegetation ward with poor cooling access faces far higher risk than a leafy neighbourhood, yet both receive the same alert.
-- **Temperature isn't the whole story.** Humidity, wind and radiation determine how heat is actually *felt* by the human body. A humid coastal city can hit high afternoon temperatures every day without being in a heatwave.
-- **Warnings don't reach people in a usable form.** Alerts are rarely tied to concrete actions, and rarely delivered in the languages residents speak.
+- **Limited local detail.** Within a city, a densely built ward with little vegetation and limited cooling access may face substantially greater risk than a greener neighbourhood, even if both receive the same warning.
+- **Temperature alone is insufficient.** Humidity, wind and radiant heat affect the body's thermal burden. As a result, similar air temperatures can produce different levels of physiological stress in different climates.
+- **Warnings need to support action.** Alerts are more useful when paired with practical guidance for residents and authorities and communicated in locally relevant languages.
 
-**PS 26083** calls for an extreme-heatwave early-warning capability built around a **Human Thermal Stress Index**.
+ThermaLens addresses these gaps by combining weather conditions with local environmental and population indicators to support ward-level heat-risk assessment.
 
 ---
 
 ## 2. Our Solution
 
-**TAPAS** scores heat risk **per municipal ward** by combining a live weather forecast with the ward's own urban form, social vulnerability and cooling access, and turns that score into action.
+**ThermaLens** estimates heat risk for each municipal ward by integrating current weather forecasts with information on urban form, population vulnerability and access to cooling. The resulting assessments are designed to inform timely warnings and response planning.
 
-1. **Measures human thermal stress** using the Universal Thermal Climate Index (UTCI), not just air temperature.
-2. **Detects heatwaves the way IMD defines them**, as a departure from *that city's own* observed seasonal normal, so alerts fire on genuine anomalies rather than routinely hot, humid weather.
-3. **Scores every ward** with a transparent composite, the **Heat–Health Stress Index (HTSI)**, from Hazard, Vulnerability, Exposure and Adaptive Capacity.
-4. **Estimates mortality and hospitalisation risk**, with mortality tied to published epidemiological relative risks.
-5. **Recommends Heat Action Plan measures** for authorities and residents, and shows the modelled effect of applying them.
-6. **Alerts people automatically** by SMS/WhatsApp in **English, Hindi and their state language**, with a heat-stroke emergency block at High and Severe.
+1. **Assesses thermal stress** using the Universal Thermal Climate Index (UTCI), which accounts for more than air temperature alone.
+2. **Evaluates heat anomalies against city-specific seasonal conditions**, using an approach informed by India Meteorological Department (IMD) heatwave criteria.
+3. **Calculates a ward-level score** using the **Heat–Health Stress Index (HTSI)**, which combines hazard, vulnerability, exposure and adaptive capacity.
+4. **Provides model-based mortality and hospitalisation risk estimates**, with the mortality component informed by published epidemiological relative risks.
+5. **Supports heat-action planning** by suggesting measures for authorities and residents and estimating their potential modelled impact.
+6. **Supports automated alerts** through SMS or WhatsApp in **English, Hindi and the relevant state language**, including emergency guidance for High and Severe risk levels.
 
 ---
 
 ## 3. Key Features
 
-| | Feature | What it gives you |
-|---|---|---|
-| 🌡️ | **Human Thermal Stress Index (UTCI + HTSI)** | Risk that reflects how heat is felt by people, not just the thermometer |
-| 🗺️ | **Ward-level GIS dashboard** | India → city → ward drill-down, with layers for Risk, Mortality, Hospitalisation Spike, UTCI and Vegetation |
-| ⏱️ | **5-day ward forecast** | Daily peak HTSI, UTCI and risk bands, with forecast confidence that decays with lead time |
-| 🚨 | **Automated event alerts + city digest** | Deduplicated threshold-crossing alerts and a 6-hourly digest with cross-suppression, so authorities aren't spammed |
-| 🗣️ | **Trilingual guidance** | English + Hindi + Marathi / Gujarati / Tamil / Telugu, with emergency numbers 112 / 108 |
-| 🛠️ | **Preventive-impact simulator** | Select Heat Action Plan measures and see the modelled drop in risk |
-| 📊 | **Resource allocation** | Wards ranked by modelled priority, with suggested proportional deployment |
-| 🔬 | **Full transparency** | Every probability shows its per-term contributions; every input is labelled with its source and provenance |
-| 📈 | **Calibration layer** | Mortality anchored to published relative risks; supports fitting to observed health data |
-| 🧪 | **Heatwave simulator** | Clearly labelled, default-off preview of escalation for demos and drills |
-| 📥 | **CSV audit export** | Per-ward HTSI, risk terms and calibration basis for every ward |
-| 🧭 | **Configurable model** | Weights, coefficients and band thresholds editable at runtime |
+| Feature | Description |
+|---|---|
+| **Thermal stress assessment (UTCI and HTSI)** | Estimates heat-related stress using physiological and environmental indicators. |
+| **Ward-level GIS dashboard** | Supports navigation from country to city and ward, with risk, mortality, hospitalisation, UTCI and vegetation layers. |
+| **Five-day ward forecast** | Displays daily peak HTSI, UTCI and risk categories; forecast confidence decreases with lead time. |
+| **Automated alerts and city digest** | Sends deduplicated threshold-crossing alerts and a six-hourly summary with duplicate suppression. |
+| **Multilingual guidance** | Provides English, Hindi and supported state-language guidance, with emergency numbers 112 and 108. |
+| **Preventive-measure simulator** | Estimates the modelled change in risk associated with selected Heat Action Plan measures. |
+| **Resource allocation support** | Ranks wards by modelled priority and suggests proportional resource deployment. |
+| **Model transparency** | Reports probability contributions and identifies the source and provenance of inputs. |
+| **Calibration layer** | Uses published relative-risk anchors for mortality and supports calibration against observed health data. |
+| **Heatwave simulator** | Provides a clearly labelled, disabled-by-default scenario for demonstrations and preparedness exercises. |
+| **CSV audit export** | Exports ward-level HTSI values, risk components and calibration basis. |
+| **Configurable model** | Allows model weights, coefficients and risk thresholds to be adjusted at runtime. |
 
 ---
 
@@ -102,7 +82,7 @@ Heatwaves are among India's deadliest and fastest-growing climate hazards. Curre
 HTSI = H × V × E × (1 − AC)
 ```
 
-With the default weights (all 1.0) this is the whole index. The general form, with the configurable weights, is:
+When each weight is set to 1.0, the expression reduces to the base index shown above. A configurable weighted form is:
 
 ```
 HTSI = (wH · H) × (wV · V) × (wE · E) × (1 − wAC · AC)
@@ -115,145 +95,168 @@ HTSI = (wH · H) × (wV · V) × (wE · E) × (1 − wAC · AC)
 | **E — Exposure** | How much does the built environment trap heat? | Satellite built / vegetation / water fractions, MODIS land-surface temperature anomaly, WUDAPT Local Climate Zones |
 | **AC — Adaptive Capacity** | Can residents cool down? | City AC baseline modulated per ward by built density, NDVI, electricity and tap-water access, hospitals per km² |
 
-HTSI maps to **Low / Moderate / High / Severe**. Mortality and hospitalisation probabilities come from two auditable logistic models on the same factors, plus a calibrated relative risk versus a normal day.
+HTSI is classified into **Low, Moderate, High or Severe** categories. Mortality and hospitalisation probabilities are generated by auditable logistic models using the same broad factors, alongside a relative-risk estimate compared with a normal day.
 
 ### Alert flow
 
 ```
 Live weather ─► UTCI + anomaly ─► Ward HTSI & risk ─► Band crossing? ─► Event alert (trilingual SMS)
-                                                    └► every 6 h ────► City digest (cross-suppressed)
+ └► every 6 h ────► City digest (cross-suppressed)
 ```
 
-Full methodology, coefficients and API details are in **[TECHNICAL.md](TECHNICAL.md)**.
+The detailed methodology, model coefficients and API reference are documented in **[TECHNICAL.md](TECHNICAL.md)**.
 
 ---
 
 ## 5. System Architecture
 
-TAPAS is a layered system: an **offline data pipeline** prepares static ward-level inputs once, and a **live runtime** fuses them with a fresh weather forecast to score every ward, raise alerts and serve the dashboard.
+ThermaLens separates preparation of relatively static ward-level datasets from live forecast processing. The runtime combines these inputs with current weather data to estimate ward-level risk, generate alerts and serve the dashboard. In the AWS deployment, **Elastic Beanstalk** manages the application environment, **Amazon EC2** provides the compute capacity for FastAPI, **Amazon S3** stores datasets and generated artifacts when the relevant integration is enabled, and **Amazon CloudWatch** collects operational logs and metrics. Elastic Beanstalk provisions and manages the EC2 instances used by its environment.
 
 ### 5.1 Layered overview
 
 ```mermaid
 flowchart TB
-    subgraph L1["1 · DATA SOURCES"]
-        direction LR
-        OWM["OpenWeatherMap<br/>live 5-day forecast"]
-        ERA["ERA5 via Open-Meteo<br/>2014-2024 climatology"]
-        MOD["NASA MODIS<br/>LST + NDVI"]
-        LCZ["WUDAPT LCZ<br/>100 m classes"]
-        CEN["Census 2011<br/>C-14 and HL-14"]
-        OSM["OpenStreetMap<br/>hospitals"]
-        ESRI["Esri imagery<br/>ward polygons"]
-    end
+ subgraph L1["1 · DATA SOURCES"]
+ direction LR
+ OWM["OpenWeatherMap<br/>live 5-day forecast"]
+ ERA["ERA5 via Open-Meteo<br/>2014-2024 climatology"]
+ MOD["NASA MODIS<br/>LST + NDVI"]
+ LCZ["WUDAPT LCZ<br/>100 m classes"]
+ CEN["Census 2011<br/>C-14 and HL-14"]
+ OSM["OpenStreetMap<br/>hospitals"]
+ ESRI["Esri imagery<br/>ward polygons"]
+ end
 
-    subgraph L2["2 · OFFLINE DATA PIPELINE - run once, refresh on demand"]
-        direction LR
-        P1["build_maps · sat_attrs<br/>ward geometry + satellite fractions"]
-        P2["fetch_modis · fetch_lcz<br/>per-ward LST, NDVI, LCZ"]
-        P3["prepare_climate<br/>monthly mean + P90 Tmax"]
-        P4["HL-14 parser<br/>electricity, kutcha, tap water"]
-        P5["calibrate_risk<br/>anchors or Poisson fit"]
-    end
+ subgraph L2["2 · OFFLINE DATA PIPELINE"]
+ direction LR
+ P1["Build ward maps<br/>geometry + satellite fractions"]
+ P2["Prepare spatial features<br/>LST, NDVI, LCZ"]
+ P3["Prepare climatology<br/>monthly mean + P90 Tmax"]
+ P4["Parse vulnerability inputs<br/>electricity, housing, water"]
+ P5["Calibrate risk<br/>anchors or Poisson fit"]
+ end
 
-    subgraph L3["3 · STORAGE"]
-        direction LR
-        JSON[("JSON datastore<br/>data/cities/*")]
-        PG[("PostGIS<br/>optional geometry")]
-        CFG[("weights.json<br/>calibration.json")]
-    end
+ S3[("AWS S3 bucket<br/>Configured datasets, processed ward features,<br/>climatology, exports and archived artifacts")]
+ subgraph AWS["3 · AWS APPLICATION HOSTING"]
+ EB["AWS Elastic Beanstalk<br/>Deploys and manages the Python environment"]
+ EC2["Amazon EC2 instance(s)<br/>Runs FastAPI + Uvicorn backend"]
+ end
+ CW["Amazon CloudWatch<br/>Application/platform logs, health and metrics"]
 
-    subgraph L4["4 · LIVE RUNTIME - FastAPI"]
-        direction TB
-        ING["Weather ingestion<br/>3 km grid · rate-paced · tagged fallback"]
-        RISK["Risk engine<br/>UTCI · H,V,E,AC · HTSI · mortality and hospitalisation"]
-        CALR["Calibration layer<br/>relative risk with stated basis"]
-        SCH["Scheduler thread<br/>national scan · event alerts · digest"]
-        MEAS["Measures engine<br/>admin actions · trilingual guidance"]
-        SIM["Simulators<br/>heatwave preview · preventive impact"]
-    end
+ subgraph L4["4 · LIVE RUNTIME - FastAPI"]
+ direction TB
+ ING["Weather ingestion<br/>3 km grid · rate-paced · tagged fallback"]
+ RISK["Risk engine<br/>UTCI · H,V,E,AC · HTSI · mortality and hospitalisation"]
+ CALR["Calibration layer<br/>relative risk with stated basis"]
+ SCH["Scheduler thread<br/>national scan · event alerts · digest"]
+ MEAS["Measures engine<br/>admin actions · trilingual guidance"]
+ SIM["Simulators<br/>heatwave preview · preventive impact"]
+ STORE[("Application storage<br/>JSON by default; optional PostGIS")]
+ end
 
-    subgraph L5["5 · DELIVERY"]
-        direction LR
-        UI["Leaflet dashboard<br/>India, city, ward"]
-        API["REST API + CSV audit export"]
-        SMS["SMS / WhatsApp<br/>Twilio, EN + HI + state language"]
-        LOG["Alert log + scan history"]
-    end
+ subgraph L5["5 · DELIVERY"]
+ direction LR
+ UI["Leaflet dashboard<br/>India, city, ward"]
+ API["REST API + CSV audit export"]
+ SMS["SMS / WhatsApp<br/>Twilio, EN + HI + state language"]
+ LOG["Alert log + scan history"]
+ end
 
-    L1 --> L2 --> L3
-    OWM --> ING
-    L3 --> RISK
-    ING --> RISK
-    CALR --> RISK
-    RISK --> SCH
-    RISK --> SIM
-    SCH --> MEAS
-    MEAS --> SMS
-    MEAS --> LOG
-    RISK --> API
-    SIM --> API
-    API --> UI
+ L1 --> L2
+ L2 -->|"Upload prepared objects when S3 integration is configured"| S3
+ S3 -.->|"Read configured datasets / artifacts"| EC2
+ EB -->|"Manages deployment and environment"| EC2
+ EC2 --> ING
+ EC2 --> RISK
+ EC2 --> SCH
+ EC2 --> MEAS
+ EC2 --> SIM
+ EC2 --> STORE
+ OWM --> ING
+ STORE --> RISK
+ ING --> RISK
+ CALR --> RISK
+ RISK --> SCH
+ RISK --> SIM
+ SCH --> MEAS
+ MEAS --> SMS
+ MEAS --> LOG
+ RISK --> API
+ SIM --> API
+ API --> UI
+ EC2 -.->|"Runtime logs and metrics"| CW
+ EB -.->|"Environment health / deployment events"| CW
 ```
 
 ### 5.2 Risk engine: from raw inputs to a ward decision
 
 ```mermaid
 flowchart LR
-    W["Hourly forecast<br/>T, RH, wind, radiation"] --> U["UTCI<br/>pythermalcomfort"]
-    W --> A["Anomaly a<br/>Tmax minus city ERA5 normal<br/>scaled to IMD thresholds"]
-    U --> S["Surge s<br/>UTCI above 36 C"]
-    A --> H["H = 0.62a + 0.38s"]
-    S --> H
+ W["Hourly forecast<br/>T, RH, wind, radiation"] --> U["UTCI<br/>pythermalcomfort"]
+ W --> A["Anomaly a<br/>Tmax minus city ERA5 normal<br/>scaled to IMD thresholds"]
+ U --> S["Surge s<br/>UTCI above 36 C"]
+ A --> H["H = 0.62a + 0.38s"]
+ S --> H
 
-    V["V Vulnerability<br/>7 Census indicators"] --> HT
-    E["E Exposure<br/>built, green, LST, LCZ"] --> HT
-    AC["AC Cooling access<br/>ward proxy"] --> HT
-    H --> HT["HTSI<br/>H x V x E x 1-AC"]
+ V["V Vulnerability<br/>7 Census indicators"] --> HT
+ E["E Exposure<br/>built, green, LST, LCZ"] --> HT
+ AC["AC Cooling access<br/>ward proxy"] --> HT
+ H --> HT["HTSI<br/>H x V x E x 1-AC"]
 
-    HT --> B["Band<br/>Low · Moderate · High · Severe"]
-    H --> L["Logistic models<br/>mortality and hospitalisation"]
-    V --> L
-    E --> L
-    AC --> L
-    L --> R["Calibrated relative risk<br/>fitted, published anchor or default"]
+ HT --> B["Band<br/>Low · Moderate · High · Severe"]
+ H --> L["Logistic models<br/>mortality and hospitalisation"]
+ V --> L
+ E --> L
+ AC --> L
+ L --> R["Calibrated relative risk<br/>fitted, published anchor or default"]
 
-    B --> D["Decision<br/>actions · alerts · allocation"]
-    R --> D
+ B --> D["Decision<br/>actions · alerts · allocation"]
+ R --> D
 ```
 
 ### 5.3 Runtime alert cycle
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    participant SC as Scheduler
-    participant OW as OpenWeatherMap
-    participant RE as Risk Engine
-    participant ME as Measures Engine
-    participant TW as Twilio
-    participant UI as Dashboard
+ autonumber
+ participant SC as Scheduler
+ participant OW as OpenWeatherMap
+ participant RE as Risk Engine
+ participant ME as Measures Engine
+ participant TW as Twilio
+ participant UI as Dashboard
 
-    loop every 30 min (budget-clamped)
-        SC->>OW: Fetch forecast per 3 km grid cell (paced, 55 per minute)
-        OW-->>SC: Records, or failure tagged as fallback
-    end
-    SC->>RE: Score all 417 wards
-    RE-->>SC: HTSI, risk, band, provenance
-    SC->>SC: Save national snapshot to history
-    alt Ward escalates into High or Severe and cooldown has passed
-        SC->>ME: Build message
-        ME-->>SC: English + Hindi + state language, plus emergency block
-        SC->>TW: Send event alert (or record as SIMULATED)
-    end
-    opt Every 6 h
-        SC->>SC: Digest, skipping wards already alerted in window
-    end
-    UI->>RE: Request city, ward or forecast (15-minute snapshot cache)
-    RE-->>UI: Factors, risk terms, forecast, provenance
+ loop every 30 min (budget-clamped)
+ SC->>OW: Fetch forecast per 3 km grid cell (paced, 55 per minute)
+ OW-->>SC: Records, or failure tagged as fallback
+ end
+ SC->>RE: Score all 417 wards
+ RE-->>SC: HTSI, risk, band, provenance
+ SC->>SC: Save national snapshot to history
+ alt Ward escalates into High or Severe and cooldown has passed
+ SC->>ME: Build message
+ ME-->>SC: English + Hindi + state language, plus emergency block
+ SC->>TW: Send event alert (or record as SIMULATED)
+ end
+ opt Every 6 h
+ SC->>SC: Digest, skipping wards already alerted in window
+ end
+ UI->>RE: Request city, ward or forecast (15-minute snapshot cache)
+ RE-->>UI: Factors, risk terms, forecast, provenance
 ```
 
-### 5.4 Components
+### 5.4 AWS deployment services
+
+| AWS service | Role in the ThermaLens pipeline | Important implementation note |
+|---|---|---|
+| **AWS Elastic Beanstalk** | Deployment and environment-management layer for the Python 3.12 / FastAPI backend. It deploys application versions, configures the environment and reports environment health. | Use the managed Python platform with a `Procfile` to start the backend. Elastic Beanstalk manages the underlying EC2 capacity. |
+| **Amazon EC2** | Compute layer on which the Elastic Beanstalk environment runs the FastAPI/Uvicorn application, weather ingestion, ward risk calculations, API endpoints and—while enabled—the in-process scheduler. | EC2 is provisioned/managed through Elastic Beanstalk. Keep secrets in environment configuration backed by a secrets service, rather than committing them to the repository. |
+| **Amazon S3** | Object storage for prepared ward-level data, climatology, geospatial inputs, model/configuration artifacts, generated CSV exports and archived snapshots, where the application pipeline is configured to upload/read these objects. | Creating a bucket alone does not connect the existing JSON-based application to S3. Add and test an S3 storage adapter, configure a bucket environment variable, and grant the EC2 instance profile least-privilege access before describing S3 storage as active. Keep Block Public Access enabled. |
+| **Amazon CloudWatch** | Central monitoring for Elastic Beanstalk environment health, EC2 metrics and application/platform logs; supports troubleshooting deployment failures, API errors, weather refresh problems and resource pressure. | Enable log streaming/retention in Elastic Beanstalk and configure alarms for unhealthy instances, elevated errors or resource utilisation. CloudWatch monitoring does not automatically persist application data to S3. |
+
+**Deployment flow:** source code → Elastic Beanstalk application version → managed EC2 instance(s) → FastAPI endpoints. The backend can read/write S3 objects only after the S3 integration and IAM permissions are configured. CloudWatch receives logs and metrics from the deployed environment for monitoring and debugging.
+
+### 5.5 Components
 
 | Component | Responsibility | Where |
 |---|---|---|
@@ -267,14 +270,14 @@ sequenceDiagram
 | **Storage adapters** | JSON by default, PostGIS geometry when `DATABASE_URL` is reachable | `backend/pg_store.py` |
 | **Frontend** | Leaflet map, layer switching, ward panel, alert log | `static/` |
 
-### 5.5 Design principles
+### 5.6 Design principles
 
-- **Provenance on everything.** Each layer carries its source, date and status (live, fallback, satellite, observed climatology), and the UI shows it.
-- **Graceful degradation.** No API key means a tagged demo series. No database means JSON. No Twilio credentials means alerts are recorded as `SIMULATED`. Missing ward data shows "Insufficient data", never a silent average.
-- **Anomaly over absolute heat.** Each city is judged against its own observed normal, following IMD heatwave criteria.
-- **Auditable and tunable.** Every probability exposes its per-term contributions, and weights, coefficients and thresholds are editable at runtime and persisted.
-- **Efficient at scale.** UTCI is vectorised per ward, snapshots are cached in 15-minute buckets, and the national scan reruns only when weather actually refreshes.
-- **Portable deployment.** The same Docker image runs locally, on Render, or with PostGIS via Docker Compose.
+- **Traceable inputs.** Data sources, dates and status labels (such as live, fallback, satellite or observed climatology) are retained and surfaced in the interface.
+- **Graceful fallback behaviour.** Without a weather API key, the system uses a labelled demonstration series; without a database connection, it uses JSON storage; and without Twilio credentials, alerts are marked `SIMULATED`. Missing ward data is reported as "Insufficient data" rather than silently replaced by an average.
+- **City-specific baselines.** Heat anomalies are evaluated against the relevant city's seasonal normal, using IMD criteria as a reference.
+- **Auditable configuration.** Model contributions are exposed, while weights, coefficients and thresholds can be changed at runtime and persisted.
+- **Runtime efficiency.** UTCI calculations are vectorised across wards, snapshots are cached in 15-minute intervals, and national scoring is repeated when weather data refreshes.
+- **Deployment flexibility.** The application can run locally with Python or Docker Compose. For AWS hosting, Elastic Beanstalk manages the EC2 runtime; S3 and CloudWatch support storage and monitoring once configured.
 
 ---
 
@@ -289,7 +292,8 @@ sequenceDiagram
 | **Geospatial** | Ward polygons (GeoJSON), Esri World Imagery, MODIS via NASA GIBS, WUDAPT LCZ (COG) |
 | **Database (optional)** | PostgreSQL 16 + PostGIS, with automatic JSON fallback |
 | **Alerts** | Twilio SMS / WhatsApp |
-| **Deployment** | Docker, Docker Compose, Render |
+| **Deployment** | AWS Elastic Beanstalk (managed Python platform), Amazon EC2 |
+| **Object storage / monitoring** | Amazon S3 (configured datasets and artifacts), Amazon CloudWatch (logs, metrics, health) |
 | **Testing** | pytest, Playwright |
 
 ---
@@ -321,7 +325,7 @@ sequenceDiagram
 | Hyderabad | Telangana | 144 | Telugu |
 | **Total** | | **417** | + English & Hindi everywhere |
 
-The four cities span very different heat regimes: dry-hot (Ahmedabad), humid-coastal (Mumbai, Chennai) and semi-arid plateau (Hyderabad). The design is intended to extend to further cities by adding ward boundaries and running the data pipeline.
+The pilot cities represent distinct climatic settings: dry-hot conditions in Ahmedabad, humid coastal conditions in Mumbai and Chennai, and a semi-arid plateau climate in Hyderabad. Coverage can be extended by adding the required ward boundaries and preparing the corresponding input datasets.
 
 ---
 
@@ -329,20 +333,20 @@ The four cities span very different heat regimes: dry-hot (Ahmedabad), humid-coa
 
 ### Try it online
 
-Open **<https://tapas-1-8mey.onrender.com>**. It is hosted on Render, so it may take a minute to wake up if idle, and the first national scan can show a "warming" state while live weather loads. Click a city, then a ward.
+The public URL will be added after the ThermaLens backend has been deployed to AWS Elastic Beanstalk and verified. Until then, the application can be started locally using the steps below.
 
 ### Run locally
 
 ```bash
-git clone <repo-url> tapas && cd tapas
+git clone <repo-url> thermalens && cd thermalens
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-export OPENWEATHER_API_KEY=your_key_here   # free tier is enough
+export OPENWEATHER_API_KEY=your_key_here # free tier is enough
 python backend/main.py
 ```
 
-Open <http://localhost:8000>. Without an API key the app still runs on a clearly tagged demo weather series.
+Open <http://localhost:8000> in a browser. If no weather API key is configured, the application uses a clearly labelled demonstration weather series.
 
 ### Run with Docker (app + PostGIS)
 
@@ -357,6 +361,7 @@ docker compose up --build
 |---|---|
 | `OPENWEATHER_API_KEY` | Live weather (unset ⇒ tagged demo fallback) |
 | `DATABASE_URL` | PostGIS (unset ⇒ JSON datastore) |
+| `THERMALENS_S3_BUCKET` | Optional S3 bucket name; used only after an S3 storage adapter is implemented and configured |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`, `TWILIO_TO` | Real SMS sends (otherwise honestly reported as `SIMULATED`) |
 | `HW_LIVE_REFRESH_S` | Weather refresh interval in seconds (default `1800` = 30 min; auto-clamped to the OpenWeatherMap free-tier budget) |
 | `HW_DIGEST_S` | City digest interval (default 6 h) |
@@ -366,40 +371,42 @@ docker compose up --build
 
 ```bash
 pip install pytest httpx
-cd backend && TAPAS_NOSCHED=1 python -m pytest ../tests -q
+cd backend && THERMALENS_NOSCHED=1 python -m pytest ../tests -q
 ```
+
+> **Note:** If the backend code still checks the legacy scheduler-disable environment variable name, update that check to `THERMALENS_NOSCHED` before relying on this renamed test command. README branding changes alone do not rename environment variables inside the application code.
 
 ---
 
 ## 10. Project Structure
 
 ```
-TAPAS/
-├── backend/        # FastAPI app, risk model, calibration, alerts, data pipeline scripts
-├── static/         # Leaflet dashboard (index.html, app.js, styles.css)
-├── data/           # Ward geometry, baselines, Census, MODIS, LCZ, calibration, weights
-├── tests/          # Automated tests
-├── scripts/        # UI regression check
+ThermaLens/
+├── backend/ # FastAPI app, risk model, calibration, alerts, data pipeline scripts
+├── static/ # Leaflet dashboard (index.html, app.js, styles.css)
+├── data/ # Ward geometry, baselines, Census, MODIS, LCZ, calibration, weights
+├── tests/ # Automated tests
+├── scripts/ # UI regression check
 ├── Dockerfile
 ├── docker-compose.yml
 ├── README.md
-└── TECHNICAL.md    # Full methodology, API reference, pipeline and calibration guide
+└── TECHNICAL.md # Full methodology, API reference, pipeline and calibration guide
 ```
 
 ---
 
 ## 11. Transparency & Limitations
 
-We designed TAPAS to state what it does *not* know.
+ThermaLens documents its current limitations and distinguishes model estimates from validated outcomes.
 
-- **Early-warning and decision-support tool, not a clinical predictor.**
-- **Mortality** is anchored to published relative risks (de Bont et al. 2024), not yet fitted to local data. **Hospitalisation** is not yet calibrated. The system supports fitting as soon as observed data is supplied.
-- **Several coefficients are defensible defaults**, not validated values. This is disclosed in the UI and API.
-- **Ward-level differences are modelled**, combining city-level Census 2011 data with ward-level satellite, HL-14 and OSM inputs. City data can calibrate the level of risk but cannot validate ward-to-ward differences.
-- **IMD absolute-temperature gate.** IMD only calls a heat wave when a departure of 4.5 °C or more from normal comes with a hot absolute maximum (40 °C on the plains, 37 °C on the coast). TAPAS applies this by scaling a positive departure by a factor that rises from 0.25 at 5 °C below that threshold (and lower) to 1.0 at the threshold, so a mild 33 °C day that is +4.6 °C over a cool-month normal is not scored as a heat wave. Real heat waves are unchanged. Switch: `imd_abs_gate` in `/api/weights`. The 5 °C ramp width and the 0.25 floor are unvalidated defaults (the floor is not zero, so wards still rank against each other on cool days); the coastal list (Mumbai, Chennai) is set in `COASTAL_CITIES`.
-- **Seasonal factor.** For mortality and hospitalisation risk, the standing ward terms (exposure, vulnerability uplift, cooling access) are scaled by how close the month's normal maximum temperature is to the city's hottest month (ERA5 2014-2024), with a floor of 0.25. This stops dense, low-cooling wards showing "Moderate" or "High" all year. Heat-wave-level anomalies (or UTCI of about 44 and above) override the season, so unseasonal heat is never damped. HTSI itself is unchanged. The floor and an on/off switch are in `/api/weights` (`season_floor`, `season_enabled`); both are unvalidated defaults.
-- **Missing data is never silently filled.** It shows as "Insufficient data", and any fallback is labelled.
-- **Simulator output** is always labelled and off by default.
+- **Decision-support scope.** ThermaLens is intended for heat-risk early warning and planning; it is not a clinical prediction system.
+- **Mortality and hospitalisation estimates.** The mortality component uses published relative-risk estimates (de Bont et al. 2024) and has not yet been fitted to local observations. The hospitalisation model is also awaiting calibration; both can be refined when suitable observed data becomes available.
+- **Unvalidated parameters.** Some coefficients are provisional defaults rather than empirically validated local estimates. This status is disclosed in the interface and API.
+- **Ward-level comparisons require validation.** The model combines city-level Census 2011 information with ward-level satellite, HL-14 and OpenStreetMap inputs. City-level data may help calibrate overall risk but cannot independently validate differences between wards.
+- **IMD absolute-temperature gate.** IMD heatwave criteria consider both departure from normal and an absolute maximum-temperature threshold (40 °C on the plains and 37 °C in coastal areas). ThermaLens scales positive temperature anomalies according to proximity to this threshold. Under the current configuration, the scaling factor rises from 0.25 at five degrees below the threshold to 1.0 at the threshold. This is intended to reduce the chance that a relatively mild day is classified as a heatwave solely because it is warmer than a cool-season normal. The behaviour is controlled by `imd_abs_gate` in `/api/weights`. The five-degree ramp and 0.25 floor are unvalidated defaults; because the floor is non-zero, wards may still be ranked relative to one another on cooler days. Mumbai and Chennai are currently listed in `COASTAL_CITIES`.
+- **Seasonal adjustment.** For mortality and hospitalisation estimates, baseline ward factors (exposure, vulnerability uplift and cooling access) are scaled according to how close the month's ERA5 normal maximum temperature (2014–2024) is to the city's hottest month, with a minimum factor of 0.25. This is intended to limit persistently elevated risk categories outside the hot season. Strong heat anomalies or UTCI values around 44 °C and above override the seasonal adjustment. HTSI itself is not changed by this factor. The minimum factor and enable/disable option are controlled by `season_floor` and `season_enabled` in `/api/weights`; these remain unvalidated defaults.
+- **Missing-data handling.** Missing values are reported as "Insufficient data"; any fallback values are explicitly labelled.
+- **Scenario simulations.** Simulator outputs are labelled, and the simulator is disabled by default.
 
 See [TECHNICAL.md](TECHNICAL.md) for the complete list.
 
@@ -407,25 +414,16 @@ See [TECHNICAL.md](TECHNICAL.md) for the complete list.
 
 ## 12. Future Scope
 
-- **Calibrate with real health data**: fit mortality and hospitalisation models using municipal death registers and NCDC/IHIP heat-illness data.
-- **Scale nationally**: extend to more cities and to IMD gridded forecasts and station data.
-- **Sub-daily satellite inputs**: integrate higher-frequency land-surface temperature and cloud-free composites.
-- **Refresh vulnerability data** with the latest Census and survey releases as they become available.
-- **Community feedback loop**: field reports from ward officers and health workers to validate and refine ward risk.
-- **More channels and languages**: IVR, app push, community loudspeaker integration, and additional regional languages.
-- **Persistent production storage** for alert history and scan archives in PostGIS.
+- **Calibrate against observed health outcomes** by fitting mortality and hospitalisation models to suitable municipal death records and NCDC/IHIP heat-illness data.
+- **Expand geographic coverage** to additional cities and incorporate IMD gridded forecasts and station observations.
+- **Improve satellite inputs** with higher-frequency land-surface temperature products and cloud-free composites.
+- **Update vulnerability indicators** as newer Census and survey datasets are released.
+- **Community and field validation** using feedback from ward officials and health workers to evaluate and improve ward-level estimates.
+- **Broaden alert delivery** through IVR, app notifications, community loudspeakers and additional regional languages.
+- **Strengthen persistent storage** for alert histories and scan archives using PostGIS or an appropriate managed storage design.
 
 ---
-
-## 13. Acknowledgements
-
-Ministry of Earth Sciences and the Smart India Hackathon 2026 organisers · India Meteorological Department · Ahmedabad Heat Action Plan · Census of India · ECMWF ERA5 & Open-Meteo · NASA GIBS / MODIS · WUDAPT & Demuzere et al. · OpenStreetMap contributors · Esri · de Bont et al. 2024 · Sagar et al. 2016.
-
----
-
 <div align="center">
 
-**Team Ecolytes · Smart India Hackathon 2026 · PS 26083**
 
 </div>
-# ThermaLens
