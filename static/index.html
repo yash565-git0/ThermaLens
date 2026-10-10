@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TAPAS · Thermal Assessment &amp; Protection Analytics System</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="mark" aria-hidden="true">T</div>
+    <div>
+      <div class="name">TAPAS</div>
+      <div class="tag">Thermal Assessment &amp; Protection Analytics System</div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <div id="live" class="pill"></div>
+    <button id="outbox" class="pill ghost" title="SMS / WhatsApp alert log">Alert log</button>
+  </div>
+</header>
+
+<div id="simbar" class="simbar">
+  <span id="simBadge" class="sim-badge live">LIVE</span>
+  <button id="simToggle" class="btn ghost sm">Preview a heatwave… Simulator</button>
+  <div id="simPop" class="sim-pop hidden">
+    <label>Raise ward temperature&nbsp;<input id="simRange" type="range" min="0" max="10" step="1" value="0"/><b id="simVal">+0 °C</b></label>
+    <button id="simApply" class="btn sm">Apply preview</button>
+    <span class="sim-note">Preview only — never shown as live data.</span>
+  </div>
+  <button id="simReset" class="btn ghost sm hidden">Reset</button>
+</div>
+
+<main class="wrap">
+  <section id="mapPanel" class="panel mappanel full">
+    <div class="map-top">
+      <div class="crumbs"><span id="crumbRoot" class="crumb cur">India</span><span id="sepCrumb" class="sep hidden">›</span><button id="crumbCity" class="crumb hidden">—</button><span id="sepCrumb2" class="sep hidden">›</span><span id="crumbWard" class="crumb cur hidden">—</span></div>
+      <div id="layers" class="seg hidden">
+        <button data-l="htsi" class="on">Risk</button>
+        <button data-l="mort">Mortality</button>
+        <button data-l="hosp">Hospitalization Spike</button>
+        <button data-l="utci">UTCI</button>
+        <button data-l="veg">Vegetation</button>
+      </div>
+      <button id="ovBtn" class="btn ghost sm hidden">Overview</button>
+      <button id="filterToggle" class="btn ghost sm hidden">Filters ▾</button>
+      <div id="searchWrap" class="searchWrap hidden">
+        <div class="searchBox">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+          <input id="wardSearch" type="text" placeholder="Search any ward across India…" autocomplete="off"/>
+        </div>
+        <div id="searchDrop" class="searchDrop hidden"></div>
+      </div>
+    </div>
+    <div id="gis" class="gis">
+      <div id="map"></div>
+      <div id="filterbar" class="filterbar hidden"></div>
+      <div id="hov" class="hov"></div>
+      <div class="mapctl">
+        <button id="zIn" title="Zoom in">+</button>
+        <button id="zOut" title="Zoom out">−</button>
+        <button id="zHome" title="Back to India">⌂</button>
+      </div>
+    </div>
+    <div id="legend" class="legend"></div>
+  </section>
+
+  <aside id="side" class="panel side floating hidden">
+    <button id="sideClose" class="side-x" title="Close">×</button>
+    <div id="sidepanel"></div>
+  </aside>
+</main>
+
+
+<div id="modal" class="modal hidden"><div class="mcard"><button id="mclose" class="mx">×</button><div id="mbody"></div></div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
