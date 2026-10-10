@@ -10,7 +10,7 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688)
 
 </div>
----
+
 
 ## Table of Contents
 
