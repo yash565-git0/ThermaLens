@@ -1,8 +1,8 @@
-# TAPAS — Technical Documentation
+# ThermaLens — Technical Documentation
 
 Thermal Assessment & Protection Analytics System. Ward-level heatwave early warning for Indian cities (Mumbai, Ahmedabad, Chennai, Hyderabad).
 
-This document describes how the system works as implemented in the code. Every coefficient marked **UNVALIDATED** is a hand-set default, not a fitted or published value. Where a statement rests on a specific file, the file is named.
+This document describes how the system works in the current codebase. Every coefficient marked **UNVALIDATED** is a manually specified default rather than a fitted or published value. Relevant source files are identified where useful.
 
 ---
 
@@ -26,13 +26,13 @@ This document describes how the system works as implemented in the code. Every c
 
 ## 1. System overview
 
-Data flows through the system in five steps:
+ThermaLens processes data through five main stages:
 
-1. **Ingest.** `weather.py` pulls the OpenWeatherMap forecast into a live store, one record per weather grid cell.
-2. **Static inputs.** ERA5 normals, satellite / MODIS / LCZ layers, Census and HL-14 tables and OSM hospitals are loaded once by `datastore.py`.
-3. **Ward snapshot.** `compute_snapshot(city, ward)` builds the four factors (H, V, E, AC) for each ward from those inputs.
-4. **Outputs.** From the factors it produces the HTSI and its band, the mortality and hospitalisation risk with bands, an optional calibrated relative risk, and the 5-day forecast.
-5. **Delivery.** FastAPI (`backend/app.py`) serves the results to the UI (`static/app.js`), and a scheduler thread (`Sched`) sends alerts.
+1. **Weather ingestion.** `weather.py` retrieves OpenWeatherMap forecasts and stores records by weather-grid cell.
+2. **Static inputs.** `datastore.py` loads ERA5 climatology, satellite/MODIS/LCZ layers, Census and HL-14 tables, and OpenStreetMap hospital data.
+3. **Ward-level assessment.** `compute_snapshot(city, ward)` derives the four model factors—Hazard (H), Vulnerability (V), Exposure (E), and Adaptive Capacity (AC)—for each ward.
+4. **Risk outputs.** The model produces HTSI values and risk bands, modelled mortality and hospitalisation scores, optional calibrated relative risk, and a five-day forecast.
+5. **Delivery.** FastAPI (`backend/app.py`) serves results to the frontend (`static/app.js`). The in-process scheduler (`Sched`) manages scans and alerts when enabled.
 
 | Layer | Files |
 |---|---|
@@ -42,10 +42,39 @@ Data flows through the system in five steps:
 | Calibration | `backend/calibration.py`, `backend/calibrate_risk.py` |
 | Optional DB path | `backend/pg_store.py`, `backend/load_postgis.py`, `backend/sql/schema.sql` |
 | UI | `static/index.html`, `static/app.js`, `static/styles.css` |
-| Tests | `tests/test_tapas.py` |
-| Deployment | `Dockerfile`, `docker-compose.yml` (app + PostGIS; the app falls back to JSON if the DB is absent) |
+| Tests | Automated test suite under `tests/` |
+| Local/container deployment | `Dockerfile`, `docker-compose.yml` (app + PostGIS; the app falls back to JSON if the DB is absent) |
+| AWS deployment target | Elastic Beanstalk-managed EC2; S3 for configured object storage; CloudWatch for logs and metrics |
 
-Run locally: `python backend/main.py` (serves on port 8000).
+Run locally with `python backend/main.py`; the service listens on port 8000. For AWS deployment, use Elastic Beanstalk as the environment manager, with its managed EC2 instance running the backend. S3 and CloudWatch require the configuration described above.
+
+
+### AWS deployment architecture
+
+The deployment target uses AWS Elastic Beanstalk to deploy and manage the backend environment. Elastic Beanstalk provisions and manages the underlying Amazon EC2 instance or instances; EC2 is the compute layer that runs the FastAPI/Uvicorn application. Amazon S3 is intended for object storage of prepared datasets and generated artifacts once the application is configured to read and write those objects. Amazon CloudWatch provides operational visibility through environment health, logs and metrics.
+
+```mermaid
+flowchart TB
+    SRC["Source code and dependencies"] --> EB["AWS Elastic Beanstalk\nApplication version and environment management"]
+    EB --> EC2["Amazon EC2\nFastAPI + Uvicorn backend"]
+    EC2 --> WX["OpenWeatherMap\nForecast ingestion"]
+    WX --> MODEL["Ward risk pipeline\nUTCI, H/V/E/AC, HTSI and risk outputs"]
+    DATA["Prepared ward data, climatology\nand geospatial inputs"] --> S3["Amazon S3\nObject storage, when integrated"]
+    S3 -.->|"Read configured objects"| EC2
+    MODEL --> API["REST API and scheduler\nForecasts, scans and alerts"]
+    API --> UI["Leaflet frontend"]
+    EC2 -.->|"Application/platform logs and metrics"| CW["Amazon CloudWatch\nLogs, metrics and health monitoring"]
+    EB -.->|"Environment events and health"| CW
+```
+
+| Service | Role in the pipeline | Configuration considerations |
+|---|---|---|
+| **AWS Elastic Beanstalk** | Deploys application versions and manages the backend runtime environment, including instance provisioning and environment health. | The Python platform can start the service through a root-level `Procfile`. Confirm the command and health check match the deployed application. |
+| **Amazon EC2** | Runs the FastAPI/Uvicorn process, weather ingestion, ward-level risk calculations, API routes and—if enabled—the in-process scheduler. | EC2 instances are managed by Elastic Beanstalk in this architecture. Attach a least-privilege instance profile for any S3 access; do not embed credentials in source code. |
+| **Amazon S3** | Intended to store prepared ward datasets, climatology, geospatial inputs, model/configuration artifacts, CSV exports and archived snapshots. | S3 integration is not automatic: the current JSON datastore will not start using a bucket just because one exists. Implement and test an S3 adapter, configure the bucket name, and grant the instance profile only the required permissions. Keep Block Public Access enabled. |
+| **Amazon CloudWatch** | Collects application/platform logs and metrics and supports monitoring deployment health, backend errors, refresh failures and resource pressure. | Enable Elastic Beanstalk log streaming and set appropriate retention and alarms. CloudWatch monitoring does not itself persist application datasets to S3. |
+
+**Current-state distinction:** Elastic Beanstalk, EC2, S3 and CloudWatch describe the target AWS deployment architecture. The repository documentation does not by itself prove that an AWS environment has been deployed, that S3 reads/writes are implemented, or that CloudWatch log streaming and alarms have been enabled. Treat S3 and monitoring integration as active only after they have been configured and verified.
 
 ---
 
@@ -69,19 +98,6 @@ Run locally: `python backend/main.py` (serves on port 8000).
 **Health outcomes (optional)**
 - **Published relative risks:** `data/observed/published_anchors.json`, used as priors in calibration.
 - **Observed deaths and admissions:** `data/observed/observed.csv`. Enables fitting when there is enough data.
-
----|---|---|
-| Live weather | OpenWeatherMap classic `/data/2.5/forecast` (free tier) | 3-hour steps, 5 days ahead. Solar radiation is **estimated** from a clear-sky model scaled by cloud cover, and every such record is flagged `_sw_estimated`. If no key is set, a labelled demo fallback series is used. |
-| Weather grid | Wards snapped to a 0.028° grid | One weather record per grid cell, shared by the wards in it. |
-| Climatology | ERA5 reanalysis via Open-Meteo archive, daily Tmax 2014–2024 | `data/cities/<City>/baseline.json`: `mean_monthly_tmax` (the "normal") and `p90_monthly_tmax` (display only). |
-| Ward boundaries | OpenStreetMap ward relations (`data/geo/*_Wards.geojson`, `data/cities/<City>/wards.geojson`) | Hyderabad uses 144 wards from a 2017-dated OSM extract. See section 12. |
-| Land cover | Esri World Imagery basemap, true-colour threshold | Gives `veg_frac`, `wat_frac`, `built_frac`. A rough proxy, not a land-cover product. |
-| MODIS | NASA GIBS, Terra | NDVI and daytime land-surface temperature per ward. |
-| LCZ | WUDAPT global Local Climate Zone map (Demuzere et al. 2022) | Per-ward built share. |
-| Census | Census of India 2011 (city level) and HL-14 tables (ward level) | Population, children 0–6, literacy, slum share, elderly 60+, disability, density, kutcha housing. |
-| Health facilities | OpenStreetMap via Overpass (`amenity=hospital`) | Point-in-ward counts, `data/cities/<City>/health.json`. |
-| Published relative risks | `data/observed/published_anchors.json` | Used as priors in calibration. |
-| Observed deaths / admissions | `data/observed/observed.csv` | Optional. Enables fitting when large enough. |
 
 ---
 
@@ -229,7 +245,7 @@ Example seasonal factors from the shipped climatology (`live` = 0):
 
 ## 7. Calibration layer
 
-Adds a relative risk versus a normal day next to the logistic output. The logistic is not changed. Each output is labelled with its basis, in priority order:
+The calibration layer adds a relative-risk estimate versus a normal day alongside the logistic-model output; it does not modify the logistic score itself. Each result is labelled by its basis, in the following priority order:
 
 1. **fitted** — Poisson count model on `observed.csv`. Requires at least 365 rows and 15 hot days (`a ≥ 0.25`).
 2. **published-anchor** — slope anchored to a published relative risk (prior, not a fit).
@@ -247,7 +263,7 @@ Fit with `backend/calibrate_risk.py`, then `POST /api/calibration/reload`.
 
 ## 8. Forecast
 
-For each ward, the 5-day window is built from 3-hour steps: hourly UTCI (vectorised), a per-step HTSI, then a per-day peak. Per day it returns peak HTSI and band, peak UTCI, mortality and hospitalisation probability and band, `season_factor`, and a confidence value (1.0 within 24 h, 0.85 to 72 h, 0.62 to 96 h, 0.45 beyond).
+For each ward, the five-day forecast uses three-hour forecast steps. UTCI is calculated in a vectorised operation, HTSI is derived for each step, and the daily peak is then selected. Per day it returns peak HTSI and band, peak UTCI, mortality and hospitalisation probability and band, `season_factor`, and a confidence value (1.0 within 24 h, 0.85 to 72 h, 0.62 to 96 h, 0.45 beyond).
 
 Model confidence (`model_confidence`) blends factor confidences: weather 0.85 if live (0.60 mixed, 0.50 fallback), environment 0.70, vulnerability 0.35, AC 0.50.
 
@@ -295,21 +311,21 @@ Model confidence (`model_confidence`) blends factor confidences: weather 0.85 if
 ## 11. Testing
 
 ```
-cd backend && TAPAS_NOSCHED=1 python3 -m pytest ../tests -q
+cd backend && THERMALENS_NOSCHED=1 python3 -m pytest ../tests -q
 ```
 
-Offline-safe (no weather network, scheduler disabled). Current result: **56 passed, 1 failed**.
+The command is intended to run offline, without weather-network calls and with the scheduler disabled. If the backend still checks the previous scheduler-disable environment variable, update the code and tests to use `THERMALENS_NOSCHED` consistently before relying on this command. Recorded result in the source revision: **56 passed, 1 failed**.
 
 Tests added: season bounds and peak/cool months, live-heat override, scaling of static terms only with `risk_terms` still summing to `z`, API switch and reset, city summary carries season, four tests for the IMD gate, and a regression test that HTSI is never exactly zero for every ward.
 
-The one failure, `test_configurable_risk_surface_and_reset`, existed before these changes. It asserts `_a_of(−3.0) == −1.0` with `sym_anom` on, but the code returns −3/6.4 = −0.47 (the docstring says the value reaches −1 at −6.4 °C). Either the test or the formula needs updating.
+The recorded failing test, `test_configurable_risk_surface_and_reset`, was already failing in the documented source revision. It asserts `_a_of(−3.0) == −1.0` with `sym_anom` on, but the code returns −3/6.4 = −0.47 (the docstring says the value reaches −1 at −6.4 °C). Either the test or the formula needs updating.
 
 ---
 
 ## 12. Known limitations
 
 **Data currency**
-- Hyderabad ward boundaries (144) and population (6,731,790, Census 2011, 650 km²) are the old GHMC. GHMC was reorganised in December 2025 to 300 wards and split into three corporations in February 2026. The panel's ward count and population are therefore out of date.
+- Hyderabad ward boundaries (144) and population (6,731,790, Census 2011, 650 km²) are the old GHMC. GHMC was reorganised in December 2025 to 300 wards and split into three corporations in February 2026. The ward count and population displayed by the application are therefore out of date.
 - Vulnerability inputs are Census 2011.
 
 **Model status**
@@ -330,9 +346,9 @@ The one failure, `test_configurable_risk_surface_and_reset`, existed before thes
 
 ---
 
-## 13. Change log for this revision
+## 13. Change log for the documented revision
 
 - **Season factor.** `SEASON`, `season_info`, `season_factor`, scaling in `_risk_terms` and `_risk_probs`, wiring into the snapshot, forecast, scenarios and simulator, new `/api/weights` fields, persistence, and a note in the city panel. Files: `backend/app.py`, `static/app.js`.
 - **IMD absolute-temperature gate.** Added in `_a_of` and at all its call sites, with the `imd_abs_gate` flag. Files: `backend/app.py`.
-- **Tests** for the season factor, the gate and the no-all-zero regression. Files: `tests/test_tapas.py`.
-- **Docs.** Formula, season and gate notes in `README.md`, and this file.
+- **Tests** cover the seasonal factor, the IMD gate and the no-all-zero regression; they are maintained in the `tests/` directory.
+- **Documentation.** Formula, seasonal-factor and IMD-gate details are recorded in `README.md` and this technical reference.
