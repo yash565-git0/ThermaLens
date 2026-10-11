@@ -1713,8 +1713,8 @@ function closeSide(){
 }
 function closeSideQuiet(){$("#side").classList.add("hidden");}
 
-function modal(html){$("#mbody").innerHTML=html;$("#modal").classList.remove("hidden");}
-function closeModal(){$("#modal").classList.add("hidden");}
+function modal(html){$("#mbody").innerHTML=html;$("#modal").classList.remove("hidden");document.body.classList.add("modal-open");}
+function closeModal(){$("#modal").classList.add("hidden");document.body.classList.remove("modal-open");}
 
 /* Illustrative messages. Rendered in a visibly different, dashed container and
    labelled, so an example can never be mistaken for a message that was sent. */

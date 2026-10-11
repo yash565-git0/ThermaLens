@@ -304,6 +304,12 @@ Model confidence (`model_confidence`) blends factor confidences: weather 0.85 if
 - `GET /api/outbox`, `/api/twilio/status`, and `POST /api/alerts/test` — alert delivery.
 - `GET /api/weather/budget`, `/api/cadence`, `/api/db/status` — weather quota, refresh cadence and database status.
 
+**Accounts and profiles (store-only v1)**
+- `POST /api/auth/signup` / `POST /api/auth/signin` — demo local accounts (email + password, PBKDF2-HMAC-SHA256, `data/users.json`); returns `{token, user_id, email, profile, profile_complete}`.
+- `GET /api/auth/me` (Bearer token), `PUT /api/auth/profile` `{location, age_range, ailments, ailments_note, consent_health_data}`, `POST /api/auth/signout`, `GET /api/auth/options` — profile enums + note.
+- `GET /api/auth/alert` (Bearer) — personalized in-app ping: severity template (Low/Moderate/High/Severe) for the user's ward forecast, personalized line when 60+ or ailments apply, nearest hospitals only on Severe + personal risk. Twilio is not involved. `POST /api/auth/alert/preview {"band"}` renders any template on demand for testing/demo.
+- Location: `{mode: geolocation|manual, lat, lon, accuracy_m, label, city, ward_id}`; geolocation sanity-checked to an India bbox, manual requires a locality label. Age range and ailments are optional; ailments require `consent_health_data: true`. Profiles are stored only — the risk engine, HTSI and guidance are unchanged in v1.
+
 `POST /api/weights` fields added in this revision: `season_enabled`, `season_floor`, `imd_abs_gate`. Values persist to `data/weights.json`.
 
 ---

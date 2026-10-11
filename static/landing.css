@@ -400,6 +400,61 @@
 .l-field{display:grid;gap:6px;margin-bottom:14px;font-size:13.5px;font-weight:600;color:var(--fg-2)}
 .l-field input{height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--rule-strong);background:#fff;font:400 16px var(--sans);color:var(--ink);transition:border-color .2s,box-shadow .2s}
 .l-field input:focus{outline:none;border-color:var(--sig);box-shadow:0 0 0 4px rgba(20,103,240,.14)}
+.l-field select{height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--rule-strong);background:#fff;font:400 15px var(--sans);color:var(--ink)}
+.l-profile-head{margin:0 0 14px;font-weight:700;color:var(--ink)}
+.l-profile-head span{display:block;font-weight:500;font-size:13px;color:var(--fg-2)}
+.l-locrow{display:flex;gap:14px;margin:4px 0 10px;font-weight:500}
+.l-locrow input{accent-color:var(--sig)}
+.l-btn.ghost.sm{height:40px;margin:0 0 8px;font-size:14px}
+.l-hint{min-height:1.2em;margin:0 0 8px;font-size:12.5px;font-weight:500;color:var(--fg-2)}
+#siLocLabel{margin-bottom:8px}
+#siCity{margin-bottom:4px}
+.l-checks{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px}
+.l-checks label{position:relative;display:inline-flex;align-items:center;gap:7px;
+  padding:8px 14px 8px 12px;border-radius:999px;border:1.5px solid var(--rule-strong);
+  background:#f7faff;font-size:13.5px;font-weight:600;color:var(--fg-2);cursor:pointer;
+  transition:border-color .18s,background .18s,color .18s,box-shadow .18s;user-select:none}
+.l-checks label:hover{border-color:rgba(20,103,240,.5)}
+.l-checks label input{accent-color:var(--sig);margin:0;width:15px;height:15px;cursor:pointer}
+.l-checks label.on{border-color:var(--sig);background:rgba(20,103,240,.1);color:var(--sig);
+  box-shadow:0 0 0 3px rgba(20,103,240,.12)}
+.l-checks label.on::after{content:"✓";font-size:12px;font-weight:700}
+#siAilNote{height:44px;margin-bottom:10px}
+.l-consent{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;font-weight:500;color:var(--fg-2)}
+.l-consent input{margin-top:3px;accent-color:var(--sig)}
+.l-modal-card{max-height:calc(100vh - 40px);overflow-y:auto}
+
+/* ═══ Personalized user ping (signed-in, monitored cities only) ═══
+   Body-level fixed card: visible on landing + dashboard, never modal. */
+.u-ping{position:fixed;right:16px;bottom:16px;z-index:1200;width:min(360px,calc(100vw - 32px));
+  background:#fff;border:1px solid var(--rule-strong);border-radius:16px;
+  box-shadow:0 18px 50px rgba(16,35,63,.25);overflow:hidden;font:400 14px/1.55 var(--sans);color:var(--ink)}
+.u-ping[hidden]{display:none}
+.u-ping-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#1a3a6b;color:#fff}
+.u-ping-bar b{flex:1;font-size:13.5px}
+.u-ping-dot{width:10px;height:10px;border-radius:50%;background:#10b981;flex:none}
+.u-ping[data-band="Moderate"] .u-ping-dot{background:#f59e0b}
+.u-ping[data-band="High"] .u-ping-dot{background:#f97316}
+.u-ping[data-band="Severe"] .u-ping-dot{background:#ef4444}
+.u-ping-btns{display:flex;gap:4px}
+.u-ping-btns button{width:28px;height:28px;border-radius:8px;border:0;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:14px;line-height:1}
+.u-ping-btns button:hover{background:rgba(255,255,255,.3)}
+.u-ping-body{padding:12px 14px;max-height:min(46vh,380px);overflow-y:auto}
+.u-ping.min .u-ping-body{display:none}
+.u-ping-body p{margin:0 0 8px}
+.u-ping-body ul{margin:0 0 8px;padding-left:18px}
+.u-ping-body h4{margin:10px 0 6px;font-size:13.5px}
+.u-ping-body h4 span{font-weight:500;color:var(--fg-2);font-size:12px}
+.u-ping-note{font-size:13px;color:var(--sev);font-weight:600}
+.u-ping-prov{font-size:11.5px;color:var(--fg-2);margin:8px 0 0}
+.u-ping-fab{position:fixed;right:16px;bottom:16px;z-index:1200;border:1px solid var(--rule-strong);
+  background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font:600 13px var(--sans);color:var(--heat-b);
+  box-shadow:0 10px 30px rgba(16,35,63,.2)}
+.u-ping-fab[hidden]{display:none}
+/* On the dashboard the zoom/locator buttons live bottom-right, so the ping
+   floats above them instead of overlapping; on the landing page it stays low. */
+body.in-app .u-ping{bottom:158px}
+body.in-app .u-ping-fab{bottom:158px}
 .l-modal-card .l-btn{width:100%;margin-top:6px}
 .l-signin-msg{min-height:1.4em;margin:12px 0 0;font-size:13.5px;color:var(--fg-2)}
 .l-signin-msg.err{color:var(--sev)}

@@ -25,6 +25,7 @@ class _NoCache(BaseHTTPMiddleware):
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from typing import Optional
 from pythermalcomfort.models import utci
 
 from datastore import STORE, CITY_IDS
@@ -34,6 +35,7 @@ from measures import admin_actions, user_sms
 from measures_i18n import personal_multilang, personal_oneline, emergency_multilang
 import pg_store
 import calibration
+import auth
 
 
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -1424,6 +1426,200 @@ def set_weights(req:WgtReq):
     return get_weights()
 
 class SimReq(BaseModel): offset:float=0; label:str=""
+# ------------------------------------------------------------ auth (demo local accounts, store-only v1)
+class AuthReq(BaseModel):
+    email:Optional[str]=None; password:Optional[str]=None
+class ProfileReq(BaseModel):
+    location:Optional[dict]=None; age_range:Optional[str]=None; ailments:Optional[list]=None
+    ailments_note:Optional[str]=None; consent_health_data:Optional[bool]=None
+def _bearer(req:Request):
+    h=req.headers.get("authorization") or ""
+    return h[7:] if h.lower().startswith("bearer ") else ""
+@app.post("/api/auth/signup")
+def auth_signup(req:AuthReq, request:Request):
+    if not auth.check_rate("signup:"+(request.client.host if request.client else "?")):
+        raise HTTPException(429,"Too many attempts. Try again in a minute.")
+    try:
+        user,token=auth.signup(req.email,req.password)
+    except KeyError as e: raise HTTPException(409,str(e))
+    except ValueError as e: raise HTTPException(422,str(e))
+    _,prof=auth.get_user_by_token(token)
+    return {"token":token, **auth.user_public(user,prof)}
+@app.post("/api/auth/signin")
+def auth_signin(req:AuthReq, request:Request):
+    if not auth.check_rate("signin:"+(request.client.host if request.client else "?")):
+        raise HTTPException(429,"Too many attempts. Try again in a minute.")
+    try:
+        user,token=auth.signin(req.email,req.password)
+    except PermissionError as e: raise HTTPException(401,str(e))
+    except ValueError as e: raise HTTPException(422,str(e))
+    _,prof=auth.get_user_by_token(token)
+    return {"token":token, **auth.user_public(user,prof)}
+@app.get("/api/auth/me")
+def auth_me(request:Request):
+    user,prof=auth.get_user_by_token(_bearer(request))
+    if not user: raise HTTPException(401,"Not signed in.")
+    return auth.user_public(user,prof)
+@app.put("/api/auth/profile")
+def auth_profile(req:ProfileReq, request:Request):
+    user,_=auth.get_user_by_token(_bearer(request))
+    if not user: raise HTTPException(401,"Not signed in.")
+    prof,errs=auth.upsert_profile(user["id"],req.model_dump())
+    if errs: raise HTTPException(422,{"errors":errs})
+    return auth.user_public(user,prof)
+@app.post("/api/auth/signout")
+def auth_signout(request:Request):
+    auth.signout(_bearer(request)); return {"ok":True}
+@app.get("/api/auth/options")
+def auth_options():
+    return {"age_ranges":auth.AGE_RANGES,"ailments":auth.AILMENT_OPTIONS,
+            "cities":auth.CITY_OPTIONS,
+            "note":"Store-only v1: profile is stored for future personalization; risk scores are unchanged."}
+# ------------------------------------------------------------ hospitals + personalized user alert
+_HOSP={"points":[],"disclaimer":""}
+def _load_hospitals():
+    try:
+        d=json.load(open(os.path.join(ROOT,"data","hospitals.json")))
+        pts=d.get("points") or []
+        _HOSP["points"]=[p for p in pts if isinstance(p.get("lat"),(int,float)) and isinstance(p.get("lon"),(int,float))]
+        _HOSP["disclaimer"]=d.get("disclaimer","")
+    except Exception:
+        _HOSP["points"]=[]; _HOSP["disclaimer"]=""
+_load_hospitals()
+def _haversine_km(lat1,lon1,lat2,lon2):
+    from math import radians,sin,cos,asin,sqrt
+    R=6371.0
+    dlat=radians(lat2-lat1); dlon=radians(lon2-lon1)
+    a=sin(dlat/2)**2+cos(radians(lat1))*cos(radians(lat2))*sin(dlon/2)**2
+    return 2*R*asin(sqrt(a))
+def _nearest_hospitals(lat,lon,city=None,limit=3,max_km=25.0):
+    out=[]
+    for p in _HOSP["points"]:
+        if city and p.get("city")!=city: continue
+        km=_haversine_km(lat,lon,p["lat"],p["lon"])
+        if km<=max_km:
+            out.append({"name":p.get("name"),"city":p.get("city"),"lat":p["lat"],"lon":p["lon"],
+                        "km":round(km,1),"emergency":bool(p.get("emergency")),
+                        "maps_url":"https://www.google.com/maps/search/?api=1&query=%s,%s"%(p["lat"],p["lon"])})
+    out.sort(key=lambda x:x["km"])
+    return out[:max(1,min(limit,10))]
+def _user_city_from_profile(prof):
+    """Monitored city for a profile: explicit city field wins, else nearest
+    city centre within 60 km of geolocation. Returns None when unmonitored."""
+    loc=(prof or {}).get("location") or {}
+    if loc.get("city") in CITY_IDS: return loc["city"]
+    if isinstance(loc.get("lat"),(int,float)) and isinstance(loc.get("lon"),(int,float)):
+        best=None; bestd=1e9
+        for c in CITY_IDS:
+            lon,lat=STORE.cities[c]["config"]["centre"]
+            d=_haversine_km(loc["lat"],loc["lon"],lat,lon)
+            if d<bestd: bestd=d; best=c
+        if bestd<=60.0: return best
+    return None
+def _nearest_ward(city,lat,lon):
+    best=None; bestd=1e9
+    for w in STORE.cities[city]["wards"]:
+        c=w.get("centroid")
+        if not c: continue
+        d=_haversine_km(lat,lon,c[1],c[0])
+        if d<bestd: bestd=d; best=w
+    return best,bestd
+# Alert templates per severity band for the signed-in user ping.
+USER_ALERT_TEMPLATES={
+ "Low":{"title":"Heat conditions are calm near you",
+        "body":"Your area is currently in the Low band. No heat precautions beyond the usual are needed.",
+        "actions":["Stay hydrated through the day."]},
+ "Moderate":{"title":"Moderate heat near you — take care",
+        "body":"Your area is in the Moderate band (HTSI {htsi}, UTCI {utci}C). Limit afternoon sun and drink water regularly.",
+        "actions":["Avoid outdoor exertion 12–4pm.","Drink water every hour.","Check on elderly neighbours."]},
+ "High":{"title":"High heat alert for your location",
+        "body":"{ward} is in the High band (HTSI {htsi}, UTCI {utci}C). Take precautions now.",
+        "actions":["Stay indoors 12–4pm.","Drink water every hour.","Check elderly and those with health conditions."]},
+ "Severe":{"title":"SEVERE heat alert for your location",
+        "body":"{ward} is in the SEVERE band (HTSI {htsi}, UTCI {utci}C). Act immediately — heatstroke risk is high.",
+        "actions":["Stay indoors; avoid all non-essential outdoor activity.","Cool with wet cloths, fans, shade.","Watch for heatstroke signs (hot dry skin, confusion) — call 112/108."]},
+}
+@app.get("/api/hospitals/nearest")
+def hospitals_nearest(lat:float,lon:float,city:str=None,limit:int=3,max_km:float=25.0):
+    if city is not None and city not in CITY_IDS: raise HTTPException(404,"unknown city")
+    res=_nearest_hospitals(lat,lon,city,limit,max_km)
+    return {"points":res,"disclaimer":_HOSP["disclaimer"] or "Verify by phone; call 112/108 in an emergency."}
+@app.get("/api/auth/alert")
+def auth_user_alert(request:Request):
+    """Personalized ping for the signed-in user only. Unmonitored location ->
+    {"monitored":False} and the frontend stays as before. Monitored ->
+    current-ward forecast + severity template; hospitals attached only when
+    band is Severe AND the profile (60+ or listed ailment) raises concern.
+    Twilio is not involved anywhere in this path (in-app template only)."""
+    user,prof=auth.get_user_by_token(_bearer(request))
+    if not user: raise HTTPException(401,"Not signed in.")
+    return _build_user_alert(prof or {})
+class AlertPreviewReq(BaseModel):
+    band:Optional[str]=None
+def _build_user_alert(prof, band_override=None):
+    """Shared builder for the live ping and the induce-on-demand preview.
+    band_override forces a severity template (preview/testing only) while
+    keeping the user's real ward numbers and hospital gating logic."""
+    if band_override is not None and band_override not in USER_ALERT_TEMPLATES:
+        raise HTTPException(422,"band must be one of: Low, Moderate, High, Severe.")
+    city=_user_city_from_profile(prof)
+    if not city: return {"monitored":False,
+        "note":"Your location is outside the four monitored pilot cities, so no local alert applies."}
+    loc=prof.get("location") or {}
+    ward=None
+    if isinstance(loc.get("lat"),(int,float)) and isinstance(loc.get("lon"),(int,float)):
+        ward,_=_nearest_ward(city,loc["lat"],loc["lon"])
+    if ward is None: ward=STORE.cities[city]["wards"][0]
+    now=dt.datetime.now(dt.timezone.utc).replace(tzinfo=None)
+    rec=LIVE.ward(city,ward)
+    prov=(rec.get("_prov","live") if rec else "demo-fallback")
+    if rec is None:
+        c=ward.get("centroid") or STORE.cities[city]["config"]["centre"][::-1]
+        rec=synth_weather(c[1],c[0],dt.datetime.now(dt.timezone.utc))
+    snap=compute_snapshot(city,ward,rec,now)
+    if not snap.get("available"):
+        if band_override is None:
+            return {"monitored":True,"city":city,"available":False,
+                    "note":"Insufficient data for your ward right now."}
+        cur={"htsi":"—","utci":"—"}; band=band_override
+    else:
+        cur=snap["current"]; band=band_override or cur["band"]
+    tpl=USER_ALERT_TEMPLATES.get(band,USER_ALERT_TEMPLATES["Moderate"])
+    ailments=[a for a in (prof.get("ailments") or []) if a!="none"]
+    elderly=prof.get("age_range")=="60+"
+    personal_risk=bool(elderly or ailments)
+    body=tpl["body"].format(ward="%s %s"%(city,ward_label(city,ward)),
+                            htsi=cur.get("htsi"),utci=cur.get("utci"))
+    if personal_risk and band in ("High","Severe"):
+        who=[]
+        if elderly: who.append("age 60+")
+        if ailments: who.append("reported condition(s): "+", ".join(ailments))
+        body+=" Your profile (%s) puts you at higher risk — take extra care."%"; ".join(who)
+    hospitals=[]
+    if band=="Severe" and personal_risk and isinstance(loc.get("lat"),(int,float)):
+        hospitals=_nearest_hospitals(loc["lat"],loc["lon"],city,3,25.0)
+    out={"monitored":True,"city":city,
+            "ward":{"id":ward["id"],"label":ward_label(city,ward)},
+            "band":band,"htsi":cur.get("htsi"),"utci":cur.get("utci"),
+            "provenance":prov,
+            "title":tpl["title"],"message":body,"actions":tpl["actions"],
+            "personal":{"elderly":elderly,"ailments":ailments,"raised":personal_risk},
+            "hospitals":hospitals,
+            "hospital_note":("Nearest facilities — approximate locations, verify by phone. Call 112/108 in an emergency." if hospitals else None)}
+    if band_override is not None:
+        out["preview"]=True
+        out["note"]="Preview of the %s template — induced on demand, not a live detection."%band_override
+    return out
+@app.post("/api/auth/alert/preview")
+def auth_user_alert_preview(req:AlertPreviewReq, request:Request):
+    """Induce any severity template on demand (testing/demo without Twilio
+    and without waiting for real weather): renders the requested band's
+    template for the signed-in user's ward/profile, with the same hospital
+    gating (Severe + personal risk) as the live ping."""
+    user,prof=auth.get_user_by_token(_bearer(request))
+    if not user: raise HTTPException(401,"Not signed in.")
+    if not req.band: raise HTTPException(422,"Provide {\"band\": \"Low|Moderate|High|Severe\"}.")
+    return _build_user_alert(prof or {}, band_override=req.band)
 @app.post("/api/sim")
 def sim(req:SimReq):
     SIM["offset"]=float(req.offset); SIM["label"]=req.label or ""

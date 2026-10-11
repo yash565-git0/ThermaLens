@@ -281,13 +281,62 @@ Call 112/108 now.</div>
   <div class="l-modal-card">
     <button class="l-modal-x" type="button" data-close-signin aria-label="Close sign in"><svg class="i" style="width:16px;height:16px" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <h2 id="signinTitle">Sign in</h2>
-    <p class="l-sub">Access your ThermaLens workspace.</p>
+    <p class="l-sub" id="siSub">Access your ThermaLens workspace.</p>
     <form id="signinForm" novalidate>
-      <label class="l-field">Email<input id="siEmail" name="email" type="email" autocomplete="username" required placeholder="you@city.gov.in"/></label>
-      <label class="l-field">Password<input id="siPass" name="password" type="password" autocomplete="current-password" required placeholder="Your password"/></label>
-      <button class="l-btn primary" type="submit">Sign in</button>
+      <div id="siCreds">
+        <label class="l-field">Email<input id="siEmail" name="email" type="email" autocomplete="username" required placeholder="you@city.gov.in"/></label>
+        <label class="l-field">Password<input id="siPass" name="password" type="password" autocomplete="current-password" required placeholder="Your password"/></label>
+        <button class="l-btn primary" type="submit">Sign in</button>
+        <button class="l-signin-skip" type="button" id="siSignup">New here? Create account</button>
+      </div>
+      <div id="siProfile" hidden>
+        <p class="l-profile-head">Tell us a little about yourself <span>(optional — helps future heat guidance)</span></p>
+        <div class="l-field"><span>Location</span>
+          <div class="l-locrow" role="radiogroup" aria-label="Location mode">
+            <label><input type="radio" name="locmode" value="geolocation"/> Use my location</label>
+            <label><input type="radio" name="locmode" value="manual" checked/> Enter manually</label>
+          </div>
+          <button class="l-btn ghost sm" type="button" id="siGeo">Detect my location</button>
+          <p class="l-hint" id="siGeoMsg" role="status" aria-live="polite"></p>
+          <input id="siLocLabel" type="text" maxlength="120" placeholder="Area / locality, e.g. Andheri West"/>
+          <select id="siCity" aria-label="City">
+            <option value="">City (optional)</option>
+            <option>Mumbai</option><option>Ahmedabad</option><option>Chennai</option>
+            <option>Hyderabad</option><option>Other</option>
+          </select>
+        </div>
+        <label class="l-field">Age range
+          <select id="siAge">
+            <option value="">Prefer not to say</option>
+            <option value="18-29">18–29</option><option value="30-44">30–44</option>
+            <option value="45-59">45–59</option><option value="60+">60+</option>
+            <option value="prefer-not-to-say">Prefer not to say</option>
+          </select>
+        </label>
+        <div class="l-field"><span>Any prevailing ailments? (tick all that apply)</span>
+          <div class="l-checks" id="siAilments">
+            <label><input type="checkbox" value="none"/> None</label>
+            <label><input type="checkbox" value="hypertension"/> Hypertension</label>
+            <label><input type="checkbox" value="cardiac"/> Cardiac</label>
+            <label><input type="checkbox" value="diabetes"/> Diabetes</label>
+            <label><input type="checkbox" value="asthma-respiratory"/> Asthma / respiratory</label>
+            <label><input type="checkbox" value="kidney"/> Kidney</label>
+            <label><input type="checkbox" value="pregnancy"/> Pregnancy</label>
+            <label><input type="checkbox" value="other"/> Other</label>
+          </div>
+          <input id="siAilNote" type="text" maxlength="280" placeholder="Anything else (optional, max 280 chars)"/>
+          <label class="l-consent"><input id="siConsent" type="checkbox"/> I consent to storing this health info for future personalized guidance. Not used in risk scores in v1.</label>
+        </div>
+        <button class="l-btn primary" type="button" id="siSaveProfile">Save profile</button>
+        <button class="l-signin-skip" type="button" id="siSkipProfile">Skip for now</button>
+      </div>
       <p class="l-signin-msg" id="siMsg" role="status" aria-live="polite"></p>
     </form>
+    <div id="siAccount" hidden>
+      <p class="l-sub" id="siWho"></p>
+      <button class="l-btn primary" type="button" id="siEditProfile">View / edit profile</button>
+      <button class="l-signin-skip" type="button" id="siSignout">Sign out</button>
+    </div>
     <button class="l-signin-skip" type="button" id="signinSkip">Continue to dashboard without signing in</button>
   </div>
 </div>
@@ -421,5 +470,29 @@ Call 112/108 now.</div>
 <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
 <script src="/static/app.js?v=20261010-9"></script>
 <script src="/static/landing.js"></script>
+
+<!-- Personalized heat ping: signed-in users in monitored cities only.
+     Body-level so it shows on both landing and dashboard; non-modal. -->
+<div id="userPing" class="u-ping" hidden role="status" aria-live="polite" aria-label="Personal heat alert">
+  <div class="u-ping-bar">
+    <span class="u-ping-dot" id="uPingDot" aria-hidden="true"></span>
+    <b id="uPingTitle">Heat alert</b>
+    <span class="u-ping-btns">
+      <button id="uPingToggle" type="button" aria-label="Expand or minimize">–</button>
+      <button id="uPingClose" type="button" aria-label="Dismiss for today">✕</button>
+    </span>
+  </div>
+  <div class="u-ping-body" id="uPingBody">
+    <p id="uPingMsg"></p>
+    <ul id="uPingActions"></ul>
+    <div id="uPingHospWrap" hidden>
+      <h4>Nearest hospitals <span>(approx. — verify by phone)</span></h4>
+      <ul id="uPingHosp"></ul>
+      <p class="u-ping-note">Emergency? Call <b>112 / 108</b> now.</p>
+    </div>
+    <p class="u-ping-prov" id="uPingProv"></p>
+  </div>
+</div>
+<button id="userPingFab" class="u-ping-fab" hidden type="button" aria-label="Reopen heat alert">⚠ Heat alert</button>
 </body>
 </html>

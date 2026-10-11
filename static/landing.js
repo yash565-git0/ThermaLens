@@ -136,25 +136,78 @@
     qa(".reveal",L).forEach(el=>rv.observe(el));
   }else{L.classList.add("no-js");}
 
-  /* ── Sign in dialog ──
-     No account service exists in this codebase, so the form never pretends to
-     authenticate. If the host page defines window.thermalensSignIn(credentials)
-     it is called (may return a promise); otherwise the user is told plainly. */
+  /* ── Sign in + profile (working demo accounts, store-only v1) ──
+     Backend: POST /api/auth/signup|signin, GET /api/auth/me,
+     PUT /api/auth/profile. Token in localStorage. Profile (location /
+     age range / ailments) is stored server-side in data/users.json and
+     does not change risk scores in v1. */
+  window.thermalensSignIn=undefined;
   (function signIn(){
     const modal=q("#signinModal"),form=q("#signinForm"),msg=q("#siMsg");
     if(!modal||!form)return;
-    let opener=null;
-    const focusable=()=>qa("button,input",modal).filter(e=>!e.disabled&&e.offsetParent!==null);
+    const creds=q("#siCreds"),prof=q("#siProfile"),acct=q("#siAccount");
+    const sub=q("#siSub"),who=q("#siWho");
+    const TOK="thermalens_token";
+    const getTok=()=>{try{return localStorage.getItem(TOK)||"";}catch(e){return"";}};
+    const setTok=t=>{try{if(t)localStorage.setItem(TOK,t);else localStorage.removeItem(TOK);}catch(e){}};
+    const say=(t,err)=>{msg.className="l-signin-msg"+(err?" err":"");msg.textContent=t||"";};
+    let opener=null,pendingGeo=null,mode="signin";
+    const focusable=()=>qa("button,input,select",modal).filter(e=>!e.disabled&&e.offsetParent!==null);
+    function show(which){
+      creds.hidden=which!=="creds";prof.hidden=which!=="profile";acct.hidden=which!=="account";
+      form.style.display=which==="account"?"none":"";
+      if(sub)sub.textContent=which==="profile"?"Almost done — optional profile.":which==="account"?"You are signed in.":"Access your ThermaLens workspace.";
+    }
     function open(from){
       opener=from||document.activeElement;closeMenu();
-      modal.hidden=false;L.classList.add("modal-open");msg.textContent="";msg.className="l-signin-msg";
-      requestAnimationFrame(()=>{modal.classList.add("open");q("#siEmail").focus();});
+      modal.hidden=false;L.classList.add("modal-open");document.body.classList.add("modal-open");say("");
+      show(getTok()?"account":"creds");
+      if(getTok())refreshMe().catch(()=>show("creds"));
+      requestAnimationFrame(()=>{modal.classList.add("open");const e=q("#siEmail");if(e&&!creds.hidden)e.focus();});
     }
     function close(){
-      modal.classList.remove("open");L.classList.remove("modal-open");
+      modal.classList.remove("open");L.classList.remove("modal-open");document.body.classList.remove("modal-open");
       setTimeout(()=>{modal.hidden=true;},reduce?0:250);
       if(opener&&opener.focus)opener.focus();
     }
+    async function apiCall(path,opts){
+      const r=await fetch(path,{headers:{"Content-Type":"application/json",...(getTok()?{"Authorization":"Bearer "+getTok()}:{})},...(opts||{})});
+      let j=null;try{j=await r.json();}catch(e){}
+      if(!r.ok){const d=j&&j.detail;throw new Error(typeof d==="string"?d:(d&&d.errors?Object.values(d.errors).join(" "):"Request failed ("+r.status+")"));}
+      return j;
+    }
+    async function refreshMe(){
+      const me=await apiCall("/api/auth/me");
+      paintAccount(me);updateNav(me);return me;
+    }
+    function paintAccount(me){
+      show("account");
+      if(who)who.textContent=me&&me.email?("Signed in as "+me.email+(me.profile_complete?" · profile saved":" · profile incomplete")):"";
+    }
+    function updateNav(me){
+      qa("[data-signin]",L).forEach(a=>{
+        if(me&&me.email){a.textContent="● "+me.email;a.setAttribute("title","Account — view profile");}
+        else{a.textContent="Sign in";a.removeAttribute("title");}
+      });
+    }
+    async function restore(){const t=getTok();if(!t)return;try{await refreshMe();}catch(e){setTok("");updateNav(null);}}
+    async function doAuth(){
+      const email=q("#siEmail").value.trim(),password=q("#siPass").value;
+      if(!email||!password){say("Enter your email and password.",1);return;}
+      say(mode==="signup"?"Creating account…":"Signing in…");
+      try{
+        const j=await apiCall(mode==="signup"?"/api/auth/signup":"/api/auth/signin",
+          {method:"POST",body:JSON.stringify({email,password})});
+        setTok(j.token);updateNav(j);
+        if(j.profile_complete){paintAccount(j);say("Signed in.");}
+        else{show("profile");say(mode==="signup"?"Account created. Optional profile below — save or skip.":"Signed in. Optional profile below — save or skip.");}
+        window.dispatchEvent(new CustomEvent("thermalens:auth",{detail:j}));
+      }catch(err){say(err.message||"Could not sign in.",1);}
+    }
+    window.thermalensSignIn=async credsArg=>{
+      if(credsArg&&credsArg.email){q("#siEmail").value=credsArg.email;q("#siPass").value=credsArg.password||"";}
+      mode="signin";await doAuth();return true;
+    };
     qa("[data-signin]",L).forEach(a=>{
       a.addEventListener("click",e=>{e.preventDefault();open(a);});
       a.addEventListener("keydown",e=>{if(e.key===" "){e.preventDefault();open(a);}});
@@ -172,21 +225,164 @@
       }
     });
     q("#signinSkip").addEventListener("click",()=>{opener=null;close();enterApp();});
-    form.addEventListener("submit",async e=>{
-      e.preventDefault();
-      const email=q("#siEmail").value.trim(),password=q("#siPass").value;
-      if(!email||!password){msg.className="l-signin-msg err";msg.textContent="Enter your email and password.";return;}
-      if(typeof window.thermalensSignIn!=="function"){
-        msg.className="l-signin-msg err";
-        msg.textContent="Sign in is not connected to an account service yet. You can continue to the dashboard below.";
-        return;
-      }
-      try{
-        msg.className="l-signin-msg";msg.textContent="Signing in…";
-        await window.thermalensSignIn({email,password});
-        msg.textContent="Signed in.";close();
-      }catch(err){msg.className="l-signin-msg err";msg.textContent=(err&&err.message)||"Could not sign in.";}
+    q("#siSignup").addEventListener("click",()=>{mode=mode==="signup"?"signin":"signup";
+      q("#siSignup").textContent=mode==="signup"?"Have an account? Sign in":"New here? Create account";
+      say(mode==="signup"?"Create a demo account (stored on this server only).":"Sign in with your demo account.");});
+    form.addEventListener("submit",e=>{e.preventDefault();doAuth();});
+    // location mode + geolocation (permission-aware, manual fallback).
+    // Once coordinates are detected the city picker is redundant (the
+    // server maps coords to a monitored city), so it hides until manual.
+    function syncCityVis(){
+      const v=(qa('input[name="locmode"]',modal).find(x=>x.checked)||{}).value||"manual";
+      const cityEl=q("#siCity");
+      cityEl.style.display=(v==="geolocation"&&pendingGeo)?"none":"";
+    }
+    qa('input[name="locmode"]',modal).forEach(r=>r.addEventListener("change",()=>{
+      const v=(qa('input[name="locmode"]',modal).find(x=>x.checked)||{}).value||"manual";
+      q("#siGeo").style.display=v==="geolocation"?"":"none";
+      q("#siLocLabel").placeholder=v==="geolocation"?"Label for detected point (optional)":"Area / locality, e.g. Andheri West";
+      syncCityVis();
+    }));
+    q("#siGeo").addEventListener("click",()=>{
+      const m=q("#siGeoMsg");
+      if(!("geolocation" in navigator)){m.textContent="Geolocation not supported — enter manually.";return;}
+      m.textContent="Locating…";
+      navigator.geolocation.getCurrentPosition(p=>{
+        pendingGeo={lat:+p.coords.latitude.toFixed(5),lon:+p.coords.longitude.toFixed(5),
+          accuracy_m:p.coords.accuracy!=null?Math.round(p.coords.accuracy):null};
+        m.textContent="Detected "+pendingGeo.lat+", "+pendingGeo.lon+(pendingGeo.accuracy_m?" (±"+pendingGeo.accuracy_m+" m)":"")+". Saved on submit.";
+        syncCityVis();
+      },err=>{
+        pendingGeo=null;
+        m.textContent=err&&err.code===1?"Location blocked — enter manually below.":"Could not detect location — enter manually below.";
+        syncCityVis();
+      },{timeout:10000,maximumAge:60000});
     });
+    function syncAilPills(){
+      qa("#siAilments input",modal).forEach(b=>{
+        const lab=b.closest("label");if(lab)lab.classList.toggle("on",b.checked);
+      });
+    }
+    qa("#siAilments input",modal).forEach(c=>c.addEventListener("change",()=>{
+      const boxes=qa("#siAilments input",modal);
+      if(c.value==="none"&&c.checked)boxes.forEach(b=>{if(b!==c)b.checked=false;});
+      if(c.value!=="none"&&c.checked){const n=boxes.find(b=>b.value==="none");if(n)n.checked=false;}
+      syncAilPills();
+    }));
+    syncAilPills();
+    function profilePayload(){
+      const locMode=(qa('input[name="locmode"]',modal).find(x=>x.checked)||{}).value||"manual";
+      const locLabel=q("#siLocLabel").value.trim(),city=q("#siCity").value;
+      let location=null;
+      // Detected coordinates already pin the city server-side, so the city
+      // picker is skipped in that case (it stays hidden via syncCityVis).
+      if(locMode==="geolocation"&&pendingGeo)location={mode:"geolocation",...pendingGeo,label:locLabel||null,city:null};
+      else if(locLabel||city)location={mode:"manual",label:locLabel||null,city:city||null};
+      else if(locMode==="geolocation"&&!pendingGeo&&!locLabel&&!city)location=null;
+      const age=q("#siAge").value||null;
+      const ailments=qa("#siAilments input",modal).filter(b=>b.checked).map(b=>b.value);
+      return{location,age_range:age==="prefer-not-to-say"?"prefer-not-to-say":(age||null),
+        ailments,ailments_note:q("#siAilNote").value.trim()||null,
+        consent_health_data:q("#siConsent").checked||null};
+    }
+    async function saveProfile(){
+      say("Saving profile…");
+      try{
+        const me=await apiCall("/api/auth/profile",{method:"PUT",body:JSON.stringify(profilePayload())});
+        paintAccount(me);updateNav(me);say(me.profile_complete?"Profile saved.":"Saved.");
+        window.dispatchEvent(new CustomEvent("thermalens:auth",{detail:me}));
+      }catch(err){say(err.message||"Could not save profile.",1);}
+    }
+    q("#siSaveProfile").addEventListener("click",saveProfile);
+    q("#siSkipProfile").addEventListener("click",async()=>{try{await refreshMe();}catch(e){show("account");}close();enterApp();});
+    q("#siEditProfile").addEventListener("click",async()=>{
+      try{
+        const me=await apiCall("/api/auth/me");
+        const p=me.profile||{};
+        if(p.location){const m=(qa('input[name="locmode"]',modal).find(x=>x.value===(p.location.mode||"manual")));if(m)m.checked=true;
+          q("#siLocLabel").value=p.location.label||"";q("#siCity").value=p.location.city||"";
+          if(p.location.lat!=null)pendingGeo={lat:p.location.lat,lon:p.location.lon,accuracy_m:p.location.accuracy_m};
+          syncCityVis();}
+        q("#siAge").value=p.age_range||"";
+        qa("#siAilments input",modal).forEach(b=>{b.checked=(p.ailments||[]).includes(b.value);});
+        syncAilPills();
+        q("#siAilNote").value=p.ailments_note||"";q("#siConsent").checked=!!p.consent_health_data;
+      }catch(e){}
+      show("profile");say("");
+    });
+    q("#siSignout").addEventListener("click",async()=>{
+      try{await apiCall("/api/auth/signout",{method:"POST"});}catch(e){}
+      setTok("");pendingGeo=null;updateNav(null);show("creds");say("Signed out.");
+      syncCityVis();syncAilPills();
+      window.dispatchEvent(new CustomEvent("thermalens:auth",{detail:null}));
+    });
+    restore();
+  })();
+  /* ── Personalized heat ping (signed-in + monitored city only) ──
+     Body-level, non-modal: minimized pill / expanded card / dismissed-fab.
+     Never shown signed-out or for unmonitored locations. */
+  (function userPing(){
+    const box=q("#userPing"),fab=q("#userPingFab");
+    if(!box||!fab)return;
+    const dot=q("#uPingDot"),title=q("#uPingTitle"),msg=q("#uPingMsg"),
+      acts=q("#uPingActions"),hospWrap=q("#uPingHospWrap"),hosp=q("#uPingHosp"),
+      prov=q("#uPingProv"),toggle=q("#uPingToggle");
+    const TOK="thermalens_token",PREF="thermalens_ping_pref";
+    const tok=()=>{try{return localStorage.getItem(TOK)||"";}catch(e){return"";}};
+    const pref=()=>{try{return JSON.parse(localStorage.getItem(PREF)||"{}");}catch(e){return{};}};
+    const setPref=p=>{try{localStorage.setItem(PREF,JSON.stringify(p));}catch(e){}};
+    const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    function hideAll(){box.hidden=true;fab.hidden=true;}
+    async function fetchAlert(){
+      hideAll();
+      if(!tok())return; // signed-out: system behaves exactly as before
+      let a=null;
+      try{
+        const r=await fetch("/api/auth/alert",{headers:{"Authorization":"Bearer "+tok()}});
+        if(r.status===401){return;}
+        a=await r.json();
+      }catch(e){return;}
+      if(!a||!a.monitored||!a.band)return; // unmonitored: no ping, as before
+      const p=pref(),today=new Date().toISOString().slice(0,10);
+      const key=a.city+":"+a.band+":"+today;
+      if(p.closed===key){fab.hidden=false;fab.onclick=()=>{setPref({});fetchAlert(true);};return;}
+      render(a, p.min===true);
+      if(arguments[0]===true){setPref({});box.hidden=false;fab.hidden=true;}
+    }
+    function render(a,min){
+      box.dataset.band=a.band;box.hidden=false;fab.hidden=true;
+      box.classList.toggle("min",!!min);
+      toggle.textContent=min?"+":"–";
+      dot.style.background=a.band==="Severe"?"#ef4444":a.band==="High"?"#f97316":a.band==="Moderate"?"#f59e0b":"#10b981";
+      title.textContent=a.title||("Heat update · "+a.band);
+      msg.textContent=a.message||"";
+      acts.innerHTML=(a.actions||[]).map(x=>"<li>"+esc(x)+"</li>").join("");
+      if(a.hospitals&&a.hospitals.length){
+        hospWrap.hidden=false;
+        hosp.innerHTML=a.hospitals.map(h=>"<li><b>"+esc(h.name)+"</b> · "+esc(h.km)+" km "+
+          '<a href="'+esc(h.maps_url)+'" target="_blank" rel="noopener">Directions</a></li>').join("");
+      }else hospWrap.hidden=true;
+      prov.textContent=(a.city?a.city+" · "+((a.ward||{}).label||"")+" · ":"")+
+        "Band "+a.band+" · HTSI "+a.htsi+" · UTCI "+a.utci+"C · "+(a.provenance||"")+
+        (a.hospital_note?" · "+a.hospital_note:"");
+    }
+    toggle.addEventListener("click",()=>{
+      const min=!box.classList.contains("min");
+      box.classList.toggle("min",min);toggle.textContent=min?"+":"–";
+      const p=pref();p.min=min;setPref(p);
+    });
+    q("#uPingClose").addEventListener("click",async()=>{
+      try{
+        const r=await fetch("/api/auth/alert",{headers:{"Authorization":"Bearer "+tok()}});
+        const a=await r.json();
+        if(a&&a.band)setPref({closed:a.city+":"+a.band+":"+new Date().toISOString().slice(0,10)});
+      }catch(e){}
+      box.hidden=true;fab.hidden=false;
+    });
+    fab.addEventListener("click",()=>{setPref({});fetchAlert(true);});
+    window.addEventListener("thermalens:auth",e=>{if(e&&e.detail)fetchAlert();else hideAll();});
+    setInterval(()=>{if(tok()&&box.hidden&&fab.hidden)fetchAlert();},10*60*1000);
+    if(tok())setTimeout(fetchAlert,2500); // let dashboard boot first; ping never blocks
   })();
   q("#yr").textContent=new Date().getFullYear();
 
