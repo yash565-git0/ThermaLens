@@ -342,7 +342,7 @@ git clone <repo-url> thermalens && cd thermalens
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-export OPENWEATHER_API_KEY=your_key_here # free tier is enough
+# Paste your key into OPENWEATHER_API_KEY in the root .env file.
 python backend/main.py
 ```
 
@@ -351,7 +351,7 @@ Open <http://localhost:8000> in a browser. If no weather API key is configured, 
 ### Run with Docker (app + PostGIS)
 
 ```bash
-export OPENWEATHER_API_KEY=your_key_here
+# Paste your key into OPENWEATHER_API_KEY in the root .env file.
 docker compose up --build
 ```
 
