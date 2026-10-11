@@ -1,9 +1,9 @@
--- TAPAS Heat EWS -- PostGIS production schema
+-- ThermaLens Heat EWS -- PostGIS production schema
 -- The runtime is file-based (JSON) for portability; this schema is the
 -- production-deploy path for real PostGIS ward polygons (spec nav section).
 -- Load with:  python3 backend/load_postgis.py  (writes SQL, pipe into psql)
---   psql -d tapas -f backend/sql/schema.sql
---   python3 backend/load_postgis.py | psql -d tapas
+--   psql -d thermalens -f backend/sql/schema.sql
+--   python3 backend/load_postgis.py | psql -d thermalens
 
 CREATE EXTENSION IF NOT EXISTS postgis;
 

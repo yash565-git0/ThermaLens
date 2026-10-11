@@ -3,7 +3,7 @@
 Two modes:
   1) DATABASE_URL set  -> applies sql/schema.sql and upserts all wards/cities
      directly (idempotent), used by docker-compose before the server starts.
-  2) otherwise         -> emits SQL on stdout:  python3 load_postgis.py | psql -d tapas
+  2) otherwise         -> emits SQL on stdout:  python3 load_postgis.py | psql -d thermalens
 
 Runtime read path lives in pg_store.py (app falls back to JSON when DB absent).
 """
@@ -12,7 +12,7 @@ import json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
-os.environ.setdefault("TAPAS_NOSCHED", "1")
+os.environ.setdefault("THERMALENS_NOSCHED", "1")
 import datastore
 
 def q(s):

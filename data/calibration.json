@@ -35,7 +35,7 @@
      1.282
     ],
     "source": "de Bont et al. 2024, Environment International 184:108461 (PMC11790314) - Ahmedabad: +24.9% (95% CI 21.7 to 28.2) daily all-cause deaths on heatwave days, defined as daily mean temperature above the city's 97th percentile for 2 consecutive days, 2008-2019 municipal death registers",
-    "caveat": "The study's exposure is daily MEAN temperature above the 97th percentile; TAPAS's anomaly driver is a Tmax departure from the ERA5 normal. a_ref = 0.5 (IMD Heat Wave onset) equates the two by assumption. A 97th-percentile mean-temperature event is probably milder than a 4.5 C Tmax departure, so this probably understates the slope.",
+    "caveat": "The study's exposure is daily MEAN temperature above the 97th percentile; ThermaLens's anomaly driver is a Tmax departure from the ERA5 normal. a_ref = 0.5 (IMD Heat Wave onset) equates the two by assumption. A 97th-percentile mean-temperature event is probably milder than a 4.5 C Tmax departure, so this probably understates the slope.",
     "rr_at_a0.5": 1.249,
     "rr_at_a1.0": 1.56,
     "baseline_per_day": 122,

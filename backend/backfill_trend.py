@@ -6,10 +6,10 @@ Honest labelling: these rows are model re-runs on archived weather with one
 representative ward per city (not full 417-ward scans, which are recorded live
 going forward in data/history.jsonl). The API and UI disclose this.
 
-Run:  TAPAS_NOSCHED=1 python3 backfill_trend.py [days]
+Run:  THERMALENS_NOSCHED=1 python3 backfill_trend.py [days]
 """
 import os, sys, json, datetime as dt
-os.environ.setdefault("TAPAS_NOSCHED", "1")
+os.environ.setdefault("THERMALENS_NOSCHED", "1")
 import requests
 
 HERE = os.path.dirname(os.path.abspath(__file__))

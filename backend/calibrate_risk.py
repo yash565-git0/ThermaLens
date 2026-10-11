@@ -1,4 +1,4 @@
-"""Calibrate TAPAS mortality / hospitalization risk against historical health data.
+"""Calibrate ThermaLens mortality / hospitalization risk against historical health data.
 
   python backend/calibrate_risk.py                 fit observed data + anchors (needs network)
   python backend/calibrate_risk.py --anchors-only  published anchors only (offline)
@@ -17,7 +17,7 @@ significant heat slope; otherwise the published anchor (if any) is kept and the
 reason is recorded. After running, POST /api/calibration/reload (or restart).
 """
 import os, sys, json, datetime as dt
-os.environ.setdefault("TAPAS_NOSCHED", "1")
+os.environ.setdefault("THERMALENS_NOSCHED", "1")
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import calibration as cal

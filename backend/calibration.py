@@ -1,4 +1,4 @@
-"""Calibration layer: ties TAPAS mortality / hospitalization risk to historical
+"""Calibration layer: ties ThermaLens mortality / hospitalization risk to historical
 health data instead of hand-set coefficients alone.
 
 Three bases, in priority order (the app labels every output with the one used):

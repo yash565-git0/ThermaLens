@@ -1,4 +1,4 @@
-# TAPAS observed health data. One row per city per day. Leave a cell empty if unknown.
+# ThermaLens observed health data. One row per city per day. Leave a cell empty if unknown.
 # city: Mumbai | Ahmedabad | Chennai | Hyderabad (exactly as in the app)
 # date: YYYY-MM-DD (local date)
 # deaths: all-cause deaths registered that day within the city (municipal birth-and-death registrar)

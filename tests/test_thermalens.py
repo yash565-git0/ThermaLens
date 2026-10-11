@@ -1,9 +1,9 @@
-"""TAPAS Heat EWS automated tests.
-Run:  cd backend && TAPAS_NOSCHED=1 python3 -m pytest ../tests -q
+"""ThermaLens Heat EWS automated tests.
+Run:  cd backend && THERMALENS_NOSCHED=1 python3 -m pytest ../tests -q
 Offline-safe: no weather network needed; scheduler disabled."""
 import os, sys, datetime as dt
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
-os.environ.setdefault("TAPAS_NOSCHED", "1")
+os.environ.setdefault("THERMALENS_NOSCHED", "1")
 os.environ.pop("TWILIO_ACCOUNT_SID", None); os.environ.pop("TWILIO_AUTH_TOKEN", None)
 os.environ.pop("TWILIO_FROM", None); os.environ.pop("TWILIO_TO", None)
 
@@ -22,7 +22,7 @@ def wards_with_sat(city):
 # ---------- API surface ----------
 def test_landing_200():
     r = client.get("/")
-    assert r.status_code == 200 and "TAPAS" in r.text
+    assert r.status_code == 200 and "ThermaLens" in r.text
 
 def test_twilio_status_honest_when_unconfigured():
     r = client.get("/api/twilio/status")
@@ -164,12 +164,12 @@ def test_sms_trilingual_and_emergency_block():
         for k in ("en","hi","state"):
             assert m[k]["signs"] and m[k]["call"]
         assert m["state_lang"]==STATE_LANG[city]
-    body,_,emg=app.build_sms("[TAPAS ALERT] x","High","Hyderabad")
+    body,_,emg=app.build_sms("[THERMALENS ALERT] x","High","Hyderabad")
     for tag in ("-- Personal guidance --","EN:","HI:","Telugu:","-- EMERGENCY (heatstroke) --","112","108"):
         assert tag in body
     assert emg and emg["numbers"]==["112","108"]
     assert len(body)<=1500                      # Twilio single-segment-ish cap used by _twilio_send
-    body_low,_,emg_low=app.build_sms("[TAPAS ALERT] x","Moderate","Mumbai")
+    body_low,_,emg_low=app.build_sms("[THERMALENS ALERT] x","Moderate","Mumbai")
     assert "Marathi:" in body_low and emg_low is None and "EMERGENCY" not in body_low
 
 def test_ward_panel_emergency_matches_band():
@@ -223,7 +223,7 @@ def test_export_csv_audit_rows(monkeypatch):
     r=client.get("/api/city/Mumbai/export.csv")
     assert r.status_code==200 and r.headers["content-type"].startswith("text/csv")
     lines=r.text.splitlines()
-    assert lines[0].startswith("# TAPAS ward export") and "UNVALIDATED" in lines[1]
+    assert lines[0].startswith("# ThermaLens ward export") and "UNVALIDATED" in lines[1]
     rows=list(_csv.DictReader(_io.StringIO("\n".join(lines[2:]))))
     assert len(rows)==len(STORE.cities["Mumbai"]["wards"])
     # deterministic flattening check: inject a snapshot, re-read the CSV

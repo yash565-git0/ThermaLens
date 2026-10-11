@@ -2,13 +2,13 @@ services:
   db:
     image: postgis/postgis:16-3.4
     environment:
-      POSTGRES_DB: tapas
-      POSTGRES_USER: tapas
-      POSTGRES_PASSWORD: tapas
+      POSTGRES_DB: thermalens
+      POSTGRES_USER: thermalens
+      POSTGRES_PASSWORD: thermalens
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tapas -d tapas"]
+      test: ["CMD-SHELL", "pg_isready -U thermalens -d thermalens"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -19,7 +19,7 @@ services:
       - "8000:8000"
     environment:
       # Live PostGIS read path (app falls back to JSON automatically if absent)
-      DATABASE_URL: postgresql://tapas:tapas@db:5432/tapas
+      DATABASE_URL: postgresql://thermalens:thermalens@db:5432/thermalens
       # OpenWeatherMap 5-day / 3-hour Forecast API key (required for live weather; app falls
       # back to a clearly-labelled demo series if unset)
       OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}

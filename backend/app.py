@@ -1,4 +1,4 @@
-"""TAPAS -- Thermal Assessment & Protection Analytics System (ward-level heat-health EWS, 4 Indian cities).
+"""ThermaLens -- Thermal Assessment & Protection Analytics System (ward-level heat-health EWS, 4 Indian cities).
 
 Risk is anomaly-driven (per Ahmedabad Heat-Action-Plan logic): a ward escalates
 when today's heat exceeds ITS OWN city's observed ERA5 seasonal norm, not from raw
@@ -55,7 +55,7 @@ def ward_label(city,w):
     area=_MUMBAI_AREAS.get(code)
     return f"{lab} · {area}" if area else lab
 
-app=FastAPI(title="TAPAS - Thermal Assessment & Protection Analytics System")
+app=FastAPI(title="ThermaLens - Thermal Assessment & Protection Analytics System")
 app.add_middleware(_NoCache)
 # ---- OpenWeatherMap refresh cadence & call budget ---------------------------
 # Free tier: 60 calls/min and 1,000,000 calls/month. One refresh pass costs one
@@ -944,7 +944,7 @@ def log_alert(type_,ward,band,msg,extra=None):
     with open(os.path.join(ROOT,"data","outbox.jsonl"),"a") as f: f.write(json.dumps(e)+"\n")
     return e
 def build_digest_message(active, suppressed=0):
-    m="[TAPAS CITY DIGEST] "+dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes")+"\n"
+    m="[THERMALENS CITY DIGEST] "+dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes")+"\n"
     m+="Wards at High/Severe: "+str(len(active))+"\n"
     for s in active:
         m+=f"- {s['ward']['city']} {s['ward']['label']}: {s['current']['band']} (HTSI {s['current']['htsi']})\n"
@@ -1042,7 +1042,7 @@ class Sched(threading.Thread):
                 continue
             msgs={"High":"Heat escalation: High hazard. ",
                   "Severe":"Heat escalation: SEVERE hazard. "}
-            msg=f"[TAPAS ALERT] {w['city']} {w['label']} - {msgs[band]}HTSI {s['current']['htsi']}, UTCI {s['current'].get('utci')}C. Preventive actions recommended now."
+            msg=f"[THERMALENS ALERT] {w['city']} {w['label']} - {msgs[band]}HTSI {s['current']['htsi']}, UTCI {s['current'].get('utci')}C. Preventive actions recommended now."
             # attach admin measures line; log_alert appends the full trilingual
             # personal guidance (+ emergency block at High/Severe)
             adm=s.get("measures",{}).get("admin",[])
@@ -1084,7 +1084,7 @@ class Sched(threading.Thread):
                     self.last_digest=now
                 elif act:
                     log_alert("digest","ALL-CITY","SUPPRESSED",
-                              f"[TAPAS DIGEST] all {len(act)} at-risk ward(s) already covered by individual "
+                              f"[THERMALENS DIGEST] all {len(act)} at-risk ward(s) already covered by individual "
                               f"event alerts within {DIGEST_S//3600}h - digest cross-suppressed (spec rule).")
                     self.last_digest=now
             time.sleep(20)
@@ -1539,11 +1539,11 @@ def export_city_csv(city: str):
         else:
             row+=[0]+[""]*(len(cols)-3)
         wtr.writerow(row)
-    body=("# TAPAS ward export - %s - %s\n" % (city, now.isoformat())
+    body=("# ThermaLens ward export - %s - %s\n" % (city, now.isoformat())
           +"# Coefficients are defensible UNVALIDATED defaults (GET /api/weights shows live values); early-warning signals, not clinical predictions.\n"
           +buf.getvalue())
     return Response(content=body, media_type="text/csv",
-                    headers={"Content-Disposition":'attachment; filename="tapas_%s_wards.csv"'%city})
+                    headers={"Content-Disposition":'attachment; filename="thermalens_%s_wards.csv"'%city})
 
 @app.get("/api/outbox")
 def get_outbox(): return list(reversed(outbox[-60:]))
@@ -1587,7 +1587,7 @@ def alerts_test():
         label=ward_label(city,w); band="High"; htsi=0.12; utci=33.8
         adm=admin_actions(band)
     msgs={"High":"Heat escalation: High hazard. ","Severe":"Heat escalation: SEVERE hazard. "}
-    msg=f"[TAPAS TEST] {city} {label} - {msgs.get(band,msgs['High'])}HTSI {htsi}, UTCI {utci}C. Preventive actions recommended now."
+    msg=f"[THERMALENS TEST] {city} {label} - {msgs.get(band,msgs['High'])}HTSI {htsi}, UTCI {utci}C. Preventive actions recommended now."
     if adm: msg+=" Action: "+adm[0]
     e=log_alert("test",f"{city} {label}",band,msg,
                 extra={"ward_city":city,"note":"manually triggered sample — not an automatic detection"})
@@ -1658,5 +1658,5 @@ class _NoCacheStatic(StaticFiles):
         return resp
 
 app.mount("/static",_NoCacheStatic(directory=os.path.join(ROOT,"static")),name="static")
-if os.environ.get("TAPAS_NOSCHED")!="1":
+if os.environ.get("THERMALENS_NOSCHED")!="1":
     SCHED=Sched(); SCHED.start()

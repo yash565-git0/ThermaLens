@@ -27,7 +27,7 @@ CM = {
     "lst":  ("MODIS_Terra_Land_Surface_Temp_Day", "https://gibs.earthdata.nasa.gov/colormaps/v1.3/MODIS_Land_Surface_Temp.xml", 0.02),    # DN -> K
     "ndvi": ("MODIS_Terra_NDVI_8Day",             "https://gibs.earthdata.nasa.gov/colormaps/v1.0/MODIS_NDVI.xml",              1.0),     # v1.0 cmap values already physical
 }
-UA = {"User-Agent": "TAPAS-HeatEWS/1.0 (urban heat early-warning research prototype)"}
+UA = {"User-Agent": "ThermaLens/1.0 (urban heat early-warning research prototype)"}
 
 def parse_val(s):
     s = s.strip()

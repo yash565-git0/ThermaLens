@@ -314,7 +314,7 @@ Model confidence (`model_confidence`) blends factor confidences: weather 0.85 if
 cd backend && THERMALENS_NOSCHED=1 python3 -m pytest ../tests -q
 ```
 
-The command is intended to run offline, without weather-network calls and with the scheduler disabled. If the backend still checks the previous scheduler-disable environment variable, update the code and tests to use `THERMALENS_NOSCHED` consistently before relying on this command. Recorded result in the source revision: **56 passed, 1 failed**.
+The command is intended to run offline, without weather-network calls and with the scheduler disabled. Recorded result in the source revision: **56 passed, 1 failed**.
 
 Tests added: season bounds and peak/cool months, live-heat override, scaling of static terms only with `risk_terms` still summing to `z`, API switch and reset, city summary carries season, four tests for the IMD gate, and a regression test that HTSI is never exactly zero for every ward.
 

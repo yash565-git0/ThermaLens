@@ -374,8 +374,6 @@ pip install pytest httpx
 cd backend && THERMALENS_NOSCHED=1 python -m pytest ../tests -q
 ```
 
-> **Note:** If the backend code still checks the legacy scheduler-disable environment variable name, update that check to `THERMALENS_NOSCHED` before relying on this renamed test command. README branding changes alone do not rename environment variables inside the application code.
-
 ---
 
 ## 10. Project Structure
