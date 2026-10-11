@@ -3,82 +3,423 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>TAPAS · Thermal Assessment &amp; Protection Analytics System</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<meta name="color-scheme" content="light"/>
+<title>ThermaLens — Heat-health intelligence for Indian cities</title>
+<meta name="description" content="ThermaLens — ward-level heat-health risk monitoring and early warning for Indian pilot cities."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<link href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet"/>
 <link rel="stylesheet" href="/static/styles.css"/>
+<link rel="stylesheet" href="/static/landing.css"/>
+<link rel="stylesheet" href="/static/dashboard.css"/>
 </head>
 <body>
-<header class="top">
-  <div class="brand">
-    <div class="mark" aria-hidden="true">T</div>
-    <div>
-      <div class="name">TAPAS</div>
-      <div class="tag">Thermal Assessment &amp; Protection Analytics System</div>
+
+<!-- ═══════════════════════════ Landing page ═══════════════════════════ -->
+<div id="landing" aria-label="ThermaLens overview">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-therm" viewBox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4 3 6.5v13L9 17l6 3 6-2.5v-13L15 7 9 4Z"/><path d="M9 4v13M15 7v13"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 4 13c0-6 7-9 16-9 0 9-3 16-9 16Z"/><path d="M4 21c3-6 7-9 12-11"/></symbol>
+    <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+    <symbol id="i-split" viewBox="0 0 24 24"><path d="M12 3v7"/><path d="M12 10 5 21M12 10l7 11"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-9Z"/></symbol>
+    <symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></symbol>
+  </defs>
+</svg>
+
+<header class="l-nav" id="lNav">
+  <div class="l-wrap l-nav-in">
+    <button class="l-brand" type="button" data-scroll="top" aria-label="ThermaLens, back to top">
+      <img src="/static/logo-thermal.png" alt="ThermaLens" class="brand-logo" width="180" height="auto" style="height:48px;width:auto"/>
+    </button>
+    <nav class="l-links" aria-label="Sections">
+      <a href="#why" data-scroll="why">Why wards</a>
+      <a href="#capabilities" data-scroll="capabilities">Capabilities</a>
+      <a href="#how" data-scroll="how">How it works</a>
+      <a href="#cities" data-scroll="cities">Pilot cities</a>
+      <a href="#alerts" data-scroll="alerts">Alerts</a>
+      <a href="#faq" data-scroll="faq">FAQ</a>
+      <a href="#signin" class="l-signin" data-signin role="button">Sign in</a>
+    </nav>
+    <div class="l-nav-cta">
+      <button class="l-btn primary sm" type="button" data-launch>Launch dashboard <svg class="i i-arrow" style="width:16px;height:16px"><use href="#i-arrow"/></svg></button>
+      <button class="l-burger" id="lBurger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="lMobile"><svg class="i"><use href="#i-menu"/></svg></button>
     </div>
   </div>
-  <div class="top-actions">
-    <div id="live" class="pill"></div>
-    <button id="outbox" class="pill ghost" title="SMS / WhatsApp alert log">Alert log</button>
+  <div class="l-mobile" id="lMobile">
+    <a href="#why" data-scroll="why">Why wards</a>
+    <a href="#capabilities" data-scroll="capabilities">Capabilities</a>
+    <a href="#how" data-scroll="how">How it works</a>
+    <a href="#cities" data-scroll="cities">Pilot cities</a>
+    <a href="#alerts" data-scroll="alerts">Alerts</a>
+    <a href="#faq" data-scroll="faq">FAQ</a>
+    <a href="#signin" class="l-signin" data-signin role="button">Sign in</a>
+    <button class="l-btn primary" type="button" data-launch style="margin-top:14px">Launch dashboard</button>
   </div>
 </header>
 
-<div id="simbar" class="simbar">
-  <span id="simBadge" class="sim-badge live">LIVE</span>
-  <button id="simToggle" class="btn ghost sm">Preview a heatwave… Simulator</button>
-  <div id="simPop" class="sim-pop hidden">
-    <label>Raise ward temperature&nbsp;<input id="simRange" type="range" min="0" max="10" step="1" value="0"/><b id="simVal">+0 °C</b></label>
-    <button id="simApply" class="btn sm">Apply preview</button>
-    <span class="sim-note">Preview only — never shown as live data.</span>
+<main>
+<!-- Hero -->
+<section class="l-hero" id="top">
+  <div class="l-wrap l-hero-grid">
+    <div>
+      <span class="l-eyebrow reveal"><span class="dot"><svg class="i"><use href="#i-flame"/></svg></span>Heat-health early warning for Indian cities</span>
+      <h1 class="reveal" style="--d:70ms">Know which ward the heat will hit hardest, <em>before it does.</em></h1>
+      <p class="l-lede reveal" style="--d:140ms">ThermaLens turns live weather, thermal-stress physics and ward-level vulnerability into a risk map and plain-language alerts, so city health teams can act ahead of a heatwave instead of after it.</p>
+      <div class="l-cta reveal" style="--d:210ms">
+        <button class="l-btn primary" type="button" data-launch>Open live dashboard <svg class="i i-arrow" style="width:18px;height:18px"><use href="#i-arrow"/></svg></button>
+        <button class="l-btn ghost" type="button" id="heroPreview"><svg class="i" style="width:18px;height:18px"><use href="#i-flame"/></svg>Preview a heatwave</button>
+      </div>
+      <div class="l-bands reveal" style="--d:260ms" aria-label="Risk bands">
+        <span>Risk bands</span>
+        <span class="k"><i style="background:var(--low)"></i>Low</span>
+        <span class="k"><i style="background:var(--mod)"></i>Moderate</span>
+        <span class="k"><i style="background:var(--high)"></i>High</span>
+        <span class="k"><i style="background:var(--sev)"></i>Severe</span>
+      </div>
+      <div class="l-facts reveal" style="--d:320ms" id="lFacts" aria-live="polite">
+        <div class="l-fact"><b class="skel" id="fCities">&ndash;</b><span>Pilot cities</span></div>
+        <div class="l-fact"><b class="skel" id="fWards">&ndash;</b><span>Wards modelled</span></div>
+        <div class="l-fact"><b class="skel" id="fWeather">&ndash;</b><span>Cities on live weather</span></div>
+        <div class="l-fact"><b class="skel" id="fHigh">&ndash;</b><span>Wards at High or Severe</span></div>
+      </div>
+    </div>
+
+    <div class="l-globe-col reveal" style="--d:120ms">
+      <div class="l-globe" id="globeBox">
+        <canvas id="globe" role="img" aria-label="Rotating globe with India highlighted and the four pilot cities marked. Select a city marker to open its ward map."></canvas>
+        <div class="l-chip a" role="status"><span class="lamp" id="chipLamp"></span><span><b id="chipLiveT">Connecting</b><span id="chipLiveS">Checking weather feeds</span></span></div>
+        <div class="l-chip b"><span><b>Ward-level HTSI</b><span>Hazard, vulnerability, exposure, capacity</span></span><span class="sw" aria-hidden="true"><i style="background:var(--low)"></i><i style="background:var(--mod)"></i><i style="background:var(--high)"></i><i style="background:var(--sev)"></i></span></div>
+      </div>
+      <div class="l-globe-cities" id="globeCities" aria-label="Open a pilot city"></div>
+    </div>
   </div>
-  <button id="simReset" class="btn ghost sm hidden">Reset</button>
-</div>
+</section>
 
-<main class="wrap">
-  <section id="mapPanel" class="panel mappanel full">
-    <div class="map-top">
-      <div class="crumbs"><span id="crumbRoot" class="crumb cur">India</span><span id="sepCrumb" class="sep hidden">›</span><button id="crumbCity" class="crumb hidden">—</button><span id="sepCrumb2" class="sep hidden">›</span><span id="crumbWard" class="crumb cur hidden">—</span></div>
-      <div id="layers" class="seg hidden">
-        <button data-l="htsi" class="on">Risk</button>
-        <button data-l="mort">Mortality</button>
-        <button data-l="hosp">Hospitalization Spike</button>
-        <button data-l="utci">UTCI</button>
-        <button data-l="veg">Vegetation</button>
-      </div>
-      <button id="ovBtn" class="btn ghost sm hidden">Overview</button>
-      <button id="filterToggle" class="btn ghost sm hidden">Filters ▾</button>
-      <div id="searchWrap" class="searchWrap hidden">
-        <div class="searchBox">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
-          <input id="wardSearch" type="text" placeholder="Search any ward across India…" autocomplete="off"/>
+<!-- Why -->
+<section class="l-sec tint" id="why">
+  <div class="l-wrap l-why">
+    <div class="reveal">
+      <span class="l-kicker">The problem</span>
+      <h2 class="l-h2">A city average hides the street that is in danger.</h2>
+      <p class="l-sub">Heat harms people unevenly. Two wards in the same city can face very different exposure, tree cover and health capacity on the same afternoon. A single citywide forecast cannot tell a health officer where to send help first.</p>
+      <div class="l-cta"><button class="l-btn ghost" type="button" data-scroll="capabilities">See what ThermaLens models <svg class="i i-arrow" style="width:17px;height:17px"><use href="#i-arrow"/></svg></button></div>
+    </div>
+    <div class="l-why-list">
+      <article class="l-why-card reveal"><span class="l-ico warm"><svg class="i"><use href="#i-map"/></svg></span><div><h3>Risk is local</h3><p>Each ward gets its own score from hazard, vulnerability, exposure and adaptive capacity, so hot spots stand out instead of averaging away.</p></div></article>
+      <article class="l-why-card reveal" style="--d:80ms"><span class="l-ico"><svg class="i"><use href="#i-therm"/></svg></span><div><h3>Air temperature is not the whole story</h3><p>Humidity, wind and solar radiation decide how hot the body feels. ThermaLens reports the Universal Thermal Climate Index alongside air temperature.</p></div></article>
+      <article class="l-why-card reveal" style="--d:160ms"><span class="l-ico green"><svg class="i"><use href="#i-bell"/></svg></span><div><h3>Warnings must be understood to work</h3><p>Alerts go out by SMS and WhatsApp in English, Hindi and the local state language, with clear steps and an emergency line.</p></div></article>
+    </div>
+  </div>
+</section>
+
+<!-- Capabilities -->
+<section class="l-sec" id="capabilities">
+  <div class="l-wrap">
+    <div class="l-head reveal">
+      <div><span class="l-kicker">Capabilities</span><h2 class="l-h2">One console, from national watch to a single ward.</h2></div>
+      <p class="l-sub">Every layer on the map explains what its number means, and anything the model cannot know is shown as a stated gap, never filled in.</p>
+    </div>
+    <div class="l-bento">
+      <article class="l-card big reveal">
+        <span class="l-ico warm"><svg class="i"><use href="#i-layers"/></svg></span>
+        <h3>Ward-level risk map with a heatwave preview</h3>
+        <p>Open a city to colour every ward by its heat-health risk band. The preview re-runs the model on raised temperatures and labels every result as a preview, so a rehearsal is never mistaken for an observation.</p>
+        <div class="l-demo" aria-label="Illustrative ward grid">
+          <div class="l-grid" id="demoGrid" role="img" aria-label="Illustrative grid of wards coloured by risk band"></div>
+          <div class="l-demo-row">
+            <label for="demoRange">Raise temperature<input id="demoRange" type="range" min="0" max="10" step="1" value="0"/><b id="demoVal">+0 °C</b></label>
+          </div>
+          <div class="l-demo-row" style="margin-top:8px"><div class="l-tally" id="demoTally" aria-live="polite"></div></div>
+          <p class="l-note">Illustration of the idea on a sample grid. Real values come from the dashboard.</p>
         </div>
-        <div id="searchDrop" class="searchDrop hidden"></div>
-      </div>
+      </article>
+      <article class="l-card reveal" style="--d:70ms">
+        <span class="l-ico"><svg class="i"><use href="#i-therm"/></svg></span><h3>Thermal stress</h3>
+        <p>UTCI in °C, from air temperature, humidity, wind and solar radiation.</p>
+        <div><div class="l-ramp" id="rampU"></div><div class="l-ramp-lab"><span>22</span><span>33</span><span>44 °C</span></div></div>
+      </article>
+      <article class="l-card reveal" style="--d:140ms">
+        <span class="l-ico green"><svg class="i"><use href="#i-leaf"/></svg></span><h3>Vegetation cover</h3>
+        <p>Share of each ward under vegetation, read from satellite basemap analysis.</p>
+        <div><div class="l-ramp" id="rampV"></div><div class="l-ramp-lab"><span>0%</span><span>22%</span><span>45%</span></div></div>
+      </article>
+      <article class="l-card reveal" style="--d:70ms">
+        <span class="l-ico warm"><svg class="i"><use href="#i-pulse"/></svg></span><h3>Mortality and hospitalisation</h3>
+        <p>Two health layers on the same four bands, with the calibration basis shown per city.</p>
+        <div class="l-chips"><span class="l-chip-b"><i style="background:var(--low)"></i>Low</span><span class="l-chip-b"><i style="background:var(--mod)"></i>Moderate</span><span class="l-chip-b"><i style="background:var(--high)"></i>High</span><span class="l-chip-b"><i style="background:var(--sev)"></i>Severe</span></div>
+      </article>
+      <article class="l-card reveal" style="--d:140ms">
+        <span class="l-ico"><svg class="i"><use href="#i-split"/></svg></span><h3>Resource allocation</h3>
+        <p>Ranks the highest-priority wards and suggests a share of a fixed response budget for each.</p>
+      </article>
+      <article class="l-card wide reveal">
+        <span class="l-ico green"><svg class="i"><use href="#i-shield"/></svg></span><h3>Preventive-measures simulator</h3>
+        <p>Pick the measures a municipality could deploy in a ward and see how the model changes with a raised adaptive-capacity assumption. It is a scenario, not a forecast.</p>
+      </article>
+      <article class="l-card wide reveal" style="--d:70ms">
+        <span class="l-ico"><svg class="i"><use href="#i-trend"/></svg></span><h3>30-day city trend</h3>
+        <p>Follow how each pilot city's risk has moved over the last month, and search any ward by name from the city view.</p>
+      </article>
     </div>
-    <div id="gis" class="gis">
-      <div id="map"></div>
-      <div id="filterbar" class="filterbar hidden"></div>
-      <div id="hov" class="hov"></div>
-      <div class="mapctl">
-        <button id="zIn" title="Zoom in">+</button>
-        <button id="zOut" title="Zoom out">−</button>
-        <button id="zHome" title="Back to India">⌂</button>
-      </div>
-    </div>
-    <div id="legend" class="legend"></div>
-  </section>
+  </div>
+</section>
 
-  <aside id="side" class="panel side floating hidden">
-    <button id="sideClose" class="side-x" title="Close">×</button>
-    <div id="sidepanel"></div>
-  </aside>
+<!-- How -->
+<section class="l-sec tint" id="how">
+  <div class="l-wrap">
+    <div class="l-head reveal">
+      <div><span class="l-kicker">How it works</span><h2 class="l-h2">From a weather feed to a message in someone's hand.</h2></div>
+      <p class="l-sub">Four stages, each visible in the dashboard, so an officer can trace any alert back to the conditions that caused it.</p>
+    </div>
+    <div class="l-steps">
+      <div class="l-step reveal"><h3>Sense</h3><p>Current weather for each pilot city, with a clear label when a city is on fallback data instead of a live feed.</p></div>
+      <div class="l-step reveal" style="--d:80ms"><h3>Model</h3><p>Compute UTCI and the composite HTSI per ward, plus mortality and hospitalisation risk bands.</p></div>
+      <div class="l-step reveal" style="--d:160ms"><h3>Map</h3><p>Colour every ward, rank priorities, and let a heatwave preview show what a hotter day would do.</p></div>
+      <div class="l-step reveal" style="--d:240ms"><h3>Alert</h3><p>Send guidance by SMS and WhatsApp in several languages, and keep a log of what was queued or sent.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Cities -->
+<section class="l-sec" id="cities">
+  <div class="l-wrap">
+    <div class="l-head reveal">
+      <div><span class="l-kicker">Pilot cities</span><h2 class="l-h2">Open a city and go straight to its wards.</h2></div>
+      <p class="l-sub">Ward-level modelling runs for these cities only. The national map tints the pilot states and makes no claim of wider ward coverage.</p>
+    </div>
+    <div class="l-cities" id="lCities"><div class="l-empty">Loading pilot cities&hellip;</div></div>
+  </div>
+</section>
+
+<!-- Alerts -->
+<section class="l-sec tint" id="alerts">
+  <div class="l-wrap l-alerts">
+    <div class="reveal">
+      <span class="l-kicker">Alerts</span>
+      <h2 class="l-h2">Clear guidance, in the language people read.</h2>
+      <p class="l-sub">When a ward escalates, ThermaLens composes a short message with the band, the thermal reading and what to do next. Messages are delivered over SMS and WhatsApp through Twilio.</p>
+      <ul class="l-list">
+        <li><svg class="i"><use href="#i-check"/></svg><span><b>Personal guidance.</b> Practical steps such as staying indoors in the afternoon and drinking water every hour.</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span><b>Local language.</b> English and Hindi, plus the state language of each pilot city.</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span><b>An honest log.</b> The alert log lists what was actually queued or sent. Examples are never mixed in.</span></li>
+      </ul>
+      <div class="l-cta"><button class="l-btn ghost" type="button" id="openLog"><svg class="i" style="width:18px;height:18px"><use href="#i-bell"/></svg>Open the alert log</button></div>
+    </div>
+    <div class="reveal" style="--d:100ms">
+      <div class="l-phone"><div class="l-phone-in">
+        <div class="l-phone-top"><span><svg class="i" style="width:15px;height:15px"><use href="#i-msg"/></svg>SMS and WhatsApp</span><span>Example format</span></div>
+        <div class="l-bubble"><span class="hd">[THERMALENS ALERT]</span> <span class="tok">{city} {ward}</span> - Heat escalation: <span class="tok">{band}</span>. HTSI <span class="tok">{htsi}</span>, UTCI <span class="tok">{utci}</span>C.
+-- Personal guidance --
+EN: Stay indoors 12-4pm | Drink water every hour | Check elderly
+HI: दोपहर 12-4 बजे घर के अंदर रहें | हर घंटे पानी पिएं
+<span class="tok">{state language}</span>: <span class="tok">{local guidance}</span>
+-- <span class="em">EMERGENCY</span> (heatstroke) --
+Call 112/108 now.</div>
+        <div class="l-lang" aria-label="Languages"><span>English</span><span>हिन्दी</span><span>State language</span></div>
+        <p class="l-note" style="margin:0">Template only. Braced fields are filled per ward. This message is not a sent alert.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="l-sec" id="faq">
+  <div class="l-wrap">
+    <div class="l-head reveal" style="grid-template-columns:minmax(0,1fr)"><div style="text-align:center"><span class="l-kicker">Questions</span><h2 class="l-h2" style="margin-left:auto;margin-right:auto;max-width:14em">What people ask before they rely on it.</h2></div></div>
+    <div class="l-faq reveal">
+      <details><summary>Is the data live? <span class="pm"><svg class="i"><use href="#i-plus"/></svg></span></summary><div class="ans">Each city reports whether its weather is live or a fallback, and the status pill in the dashboard header says which. Fallback data is always labelled and never presented as live.</div></details>
+      <details><summary>What does a heatwave preview do? <span class="pm"><svg class="i"><use href="#i-plus"/></svg></span></summary><div class="ans">It re-runs the model on temperatures you raise, from 0 to 10 °C. Results are marked PREVIEW everywhere and are never recorded as observations. Return to live data at any time.</div></details>
+      <details><summary>Are alerts really sent? <span class="pm"><svg class="i"><use href="#i-plus"/></svg></span></summary><div class="ans">Alerts are delivered over SMS and WhatsApp through Twilio. The alert log shows everything the system has queued or sent. The message-format examples are illustrations and were never sent.</div></details>
+      <details><summary>Does it cover all of India? <span class="pm"><svg class="i"><use href="#i-plus"/></svg></span></summary><div class="ans">No. Ward-level modelling covers four pilot cities. The national map highlights the pilot states and does not suggest ward coverage elsewhere.</div></details>
+      <details><summary>How trustworthy are the health layers? <span class="pm"><svg class="i"><use href="#i-plus"/></svg></span></summary><div class="ans">The calibration basis is shown per city in the ward panel. Hospitalisation coefficients are defaults unless a city shows a fitted basis, and the interface says so wherever it applies.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="l-sec" style="padding-top:0">
+  <div class="l-wrap">
+    <div class="l-final reveal">
+      <h2>See your city's wards in the heat, today.</h2>
+      <p>Open the live dashboard, pick a pilot city and watch the risk bands resolve ward by ward.</p>
+      <div class="l-cta"><button class="l-btn primary" type="button" data-launch>Launch dashboard <svg class="i i-arrow" style="width:18px;height:18px"><use href="#i-arrow"/></svg></button><button class="l-btn ghost" type="button" id="finalPreview">Preview a heatwave</button></div>
+    </div>
+  </div>
+</section>
 </main>
 
+<footer class="l-foot">
+  <div class="l-wrap">
+    <div class="l-foot-grid">
+      <div>
+        <button class="l-brand" type="button" data-scroll="top" aria-label="ThermaLens, back to top">
+          <img src="/static/logo-thermal.png" alt="ThermaLens" class="brand-logo" width="180" height="auto" style="height:48px;width:auto"/>
+        </button>
+        <p>Ward-level heat-health risk monitoring and early warning for Indian pilot cities.</p>
+      </div>
+      <div><h4>Explore</h4><ul><li><a href="#capabilities" data-scroll="capabilities">Capabilities</a></li><li><a href="#how" data-scroll="how">How it works</a></li><li><a href="#cities" data-scroll="cities">Pilot cities</a></li><li><a href="#faq" data-scroll="faq">FAQ</a></li></ul></div>
+      <div><h4>Product</h4><ul><li><a data-launch role="link" tabindex="0">Live dashboard</a></li><li><a id="footLog" role="link" tabindex="0">Alert log</a></li><li><a data-scroll="top" role="link" tabindex="0">Back to top</a></li></ul></div>
+    </div>
+    <div class="l-legal"><span>&copy; <span id="yr"></span> ThermaLens. Risk bands follow the IMD watch colour convention.</span><span>Basemap tiles &copy; Esri. Map rendering by MapLibre GL.</span></div>
+  </div>
+</footer>
 
-<div id="modal" class="modal hidden"><div class="mcard"><button id="mclose" class="mx">×</button><div id="mbody"></div></div></div>
+<!-- Sign in dialog -->
+<div class="l-modal" id="signinModal" role="dialog" aria-modal="true" aria-labelledby="signinTitle" hidden>
+  <div class="l-modal-card">
+    <button class="l-modal-x" type="button" data-close-signin aria-label="Close sign in"><svg class="i" style="width:16px;height:16px" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <h2 id="signinTitle">Sign in</h2>
+    <p class="l-sub">Access your ThermaLens workspace.</p>
+    <form id="signinForm" novalidate>
+      <label class="l-field">Email<input id="siEmail" name="email" type="email" autocomplete="username" required placeholder="you@city.gov.in"/></label>
+      <label class="l-field">Password<input id="siPass" name="password" type="password" autocomplete="current-password" required placeholder="Your password"/></label>
+      <button class="l-btn primary" type="submit">Sign in</button>
+      <p class="l-signin-msg" id="siMsg" role="status" aria-live="polite"></p>
+    </form>
+    <button class="l-signin-skip" type="button" id="signinSkip">Continue to dashboard without signing in</button>
+  </div>
+</div>
+</div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="/static/app.js"></script>
+
+<!-- ─────────────────────────────── Header ─────────────────────────────── -->
+<header class="topbar">
+  <div class="brand">
+    <img src="/static/logo-thermal.png" alt="ThermaLens" class="brand-logo-dash" style="height:36px;width:auto;"/>
+  </div>
+
+  <nav class="crumbs" aria-label="Location">
+    <button id="crumbRoot" class="crumb cur" type="button">India</button>
+    <span id="sepCrumb" class="sep hidden" aria-hidden="true">/</span>
+    <button id="crumbCity" class="crumb hidden" type="button">—</button>
+    <span id="sepCrumb2" class="sep hidden" aria-hidden="true">/</span>
+    <span id="crumbWard" class="crumb cur hidden">—</span>
+  </nav>
+
+  <div id="searchWrap" class="search-wrap hidden">
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+      <input id="wardSearch" type="text" placeholder="Search a ward" autocomplete="off"
+             role="combobox" aria-expanded="false" aria-controls="searchDrop" aria-autocomplete="list"/>
+    </div>
+    <div id="searchDrop" class="search-drop hidden" role="listbox" aria-label="Matching wards"></div>
+  </div>
+
+  <div class="topbar-right">
+    <div id="live" class="status-pill" role="status" aria-live="polite">Connecting…</div>
+    <button id="outbox" class="topbar-btn" type="button" title="Alerts sent by SMS and WhatsApp">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Alerts
+    </button>
+  </div>
+</header>
+
+<!-- ───────────────────────── Data-state strip ─────────────────────────── -->
+<div id="simbar" class="sim-strip">
+  <span id="simBadge" class="sim-badge live">LIVE</span>
+  <span id="simHint" class="sim-hint">Showing current conditions.</span>
+  <button id="simToggle" class="btn-ghost sm" type="button" aria-expanded="false" aria-controls="simPop">Preview a heatwave</button>
+  <button id="simReset" class="btn-ghost sm hidden" type="button">Return to live</button>
+  <div id="simPop" class="sim-pop hidden">
+    <label for="simRange">Raise temperature
+      <input id="simRange" type="range" min="0" max="10" step="1" value="0"/>
+      <b id="simVal">+0 °C</b>
+    </label>
+    <button id="simApply" class="btn-primary sm" type="button">Apply preview</button>
+    <p class="sim-note">A preview re-runs the model on raised temperatures. Results are labelled PREVIEW everywhere and are never recorded as observations.</p>
+  </div>
+</div>
+
+<!-- ───────── Workspace: control rail · map · detail panel, all docked ───── -->
+<main class="main">
+  <div class="map-wrap">
+    <div id="map" role="application" aria-label="Heat-health risk map"></div>
+
+    <!-- Floating layer bar (top-left) -->
+    <div id="layerSection" class="map-toolbar hidden">
+      <div id="layers" class="layer-bar" role="radiogroup" aria-label="Map layer">
+        <button data-l="htsi" class="layer-btn on" type="button" role="radio" aria-checked="true">Risk</button>
+        <button data-l="mort" class="layer-btn" type="button" role="radio" aria-checked="false">Mortality</button>
+        <button data-l="hosp" class="layer-btn" type="button" role="radio" aria-checked="false">Hospitalisation</button>
+        <button data-l="utci" class="layer-btn" type="button" role="radio" aria-checked="false">UTCI</button>
+        <button data-l="veg" class="layer-btn" type="button" role="radio" aria-checked="false">Vegetation</button>
+      </div>
+    </div>
+
+    <!-- Legend (bottom center) -->
+    <div class="legend-float">
+      <div id="legend" class="legend"></div>
+    </div>
+
+    <!-- Filter panel (top-right, floating) -->
+    <div id="filterbar" class="filter-panel hidden"></div>
+
+    <!-- Basemap + view toggle (bottom-left) -->
+    <div class="map-settings">
+      <div class="style-switcher" role="radiogroup" aria-label="Basemap">
+        <button class="style-btn" data-style="dark" type="button" role="radio" aria-checked="false"><span class="style-dot dark-dot" aria-hidden="true"></span>Dark</button>
+        <button class="style-btn on" data-style="light" type="button" role="radio" aria-checked="true"><span class="style-dot light-dot" aria-hidden="true"></span>Light</button>
+        <button class="style-btn" data-style="satellite" type="button" role="radio" aria-checked="false"><span class="style-dot sat-dot" aria-hidden="true"></span>Satellite</button>
+        <button class="style-btn" data-style="streets" type="button" role="radio" aria-checked="false"><span class="style-dot street-dot" aria-hidden="true"></span>Streets</button>
+      </div>
+      <div class="view-toggle" role="radiogroup" aria-label="Projection">
+        <button id="view2d" class="view-btn on" type="button" role="radio" aria-checked="true" aria-pressed="true">Flat</button>
+        <button id="view3d" class="view-btn" type="button" role="radio" aria-checked="false" aria-pressed="false"
+                title="Tilt the map and raise each ward by its risk band">Raised</button>
+      </div>
+    </div>
+
+    <!-- Status + controls (bottom) -->
+    <div class="map-status-float">
+      <button id="ovBtn" class="btn-ghost sm hidden" type="button">Overview</button>
+      <button id="filterToggle" class="btn-ghost sm hidden" type="button" aria-expanded="false" aria-controls="filterbar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        Filter
+      </button>
+      <div id="mapStatus" class="map-status" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- Zoom controls (bottom-right) -->
+    <div class="map-controls" role="group" aria-label="Map camera">
+      <button id="zIn" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+      <button id="zOut" type="button" title="Zoom out" aria-label="Zoom out">−</button>
+      <button id="zHome" type="button" title="Back to India" aria-label="Back to India">⌂</button>
+    </div>
+
+    <div id="hov" class="hover-tip" aria-hidden="true"></div>
+    <aside id="side" class="drawer hidden" aria-label="Details">
+      <button id="sideClose" class="drawer-close" type="button" title="Close panel" aria-label="Close panel">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div id="sidepanel" class="drawer-body"></div>
+    </aside>
+  </div>
+</main>
+
+<!-- ─────────────────────────────── Modal ──────────────────────────────── -->
+<div id="modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Alert log">
+  <div class="modal-card">
+    <button id="mclose" class="modal-x" type="button" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div id="mbody"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
+<script src="/static/app.js?v=20261010-9"></script>
+<script src="/static/landing.js"></script>
 </body>
 </html>
